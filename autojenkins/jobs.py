@@ -22,15 +22,21 @@ class Jenkins(object):
         return command.format(self.ROOT, *args)
 
 
-    def build(self, jobname):
-        """Trigger Jenkins to build a job."""
-        return requests.post(self._build_url(BUILD, jobname))
-
-
     def job_info(self, jobname):
         """Get all information for a job as a Python object (dicts & lists)."""
         response = requests.get(self._build_url(JOBINFO, jobname))
         return eval(response.content)
+
+
+    def get_config_xml(self, jobname):
+        """Get the ``config.xml`` file that contains the full job definition."""
+        response = requests.get(self._build_url(CONFIG, jobname))
+        return response.content
+
+
+    def build(self, jobname):
+        """Trigger Jenkins to build a job."""
+        return requests.post(self._build_url(BUILD, jobname))
 
 
     def copy(self, jobname, copy_from='template'):
@@ -41,12 +47,18 @@ class Jenkins(object):
         return requests.post(self._build_url(NEWJOB), params=params)
 
 
-    def get_config_xml(self, jobname):
-        """Get the ``config.xml`` file that contains the full job definition."""
-        response = requests.get(self._build_url(CONFIG, jobname))
-        return response.content
-
-
     def delete(self, jobname):
         """Delete a job."""
         return requests.post(self._build_url(DELETE, jobname))
+
+
+    def last_success(self, jobname):
+        """Return information about the last successful build."""
+        return requests.post(self._build_url(LAST_SUCCESS, jobname))
+
+
+    def last_result(self, jobname):
+        """Obtain results from last execution."""
+        last_result_url = self.job_info(jobname)['lastBuild']['url']
+        response = requests.get(last_result_url + API)
+        return eval(response.content)
