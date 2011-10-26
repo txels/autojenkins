@@ -3,6 +3,7 @@ import requests
 ROOT = 'http://jenkins.pe.local/'
 
 API = '/api/python'
+DELETE  = ROOT + 'job/{0}/doDelete'
 BUILD   = ROOT + 'job/{0}/build'
 CONFIG  = ROOT + 'job/{0}/config.xml'
 NEWJOB  = ROOT + 'createItem'
@@ -12,19 +13,20 @@ TEST_REPORT  = ROOT + 'job/{0}/lastSuccessfulBuild/testReport' + API
 
 
 def build(jobname):
-    url = BUILD.format(jobname)
-    return requests.post(url)
+    return requests.post(BUILD.format(jobname))
 
 def job_info(jobname):
-    url = JOBINFO.format(jobname)
-    response = requests.get(url)
+    response = requests.get(JOBINFO.format(jobname))
     return eval(response.content)
 
-def new_job(jobname):
-    params = { 'name': jobname, 'mode': 'copy', 'from': 'template' }
+def copy(jobname, copy_from='template'):
+    params = { 'name': jobname, 'mode': 'copy', 'from': copy_from }
     return requests.post(NEWJOB, params=params)
 
 def get_config_xml(jobname):
-    url = CONFIG.format(jobname)
-    response = requests.get(url)
+    response = requests.get(CONFIG.format(jobname))
     return response.content
+
+def delete(jobname):
+    return requests.post(DELETE.format(jobname))
+
