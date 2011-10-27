@@ -30,7 +30,6 @@ Sample use:
     j.get_config_xml('template')
 
     # Create a new job from a job named 'template', replacing variables
-
     j.create_copy('my-new-job', 'template',
                   repo='mbf-warehouse-screens',
                   branch='us544_login',
