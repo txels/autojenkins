@@ -43,10 +43,3 @@ Sample use:
     result = j.last_result('my-new-job')['result']
     if result == 'SUCCESS':
         j.delete('my-new-job')
-
-
-TODO
-----
-
-* Create a job from scratch (e.g. create the ``config.xml`` from a Jinja2
-  template and some parameters, and post it to Jenkins)
