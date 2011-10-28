@@ -1,4 +1,3 @@
-from os import path
 from autojenkins import Jenkins
 
 
@@ -8,9 +7,9 @@ if __name__ == '__main__':
     # config_file = path.join(dir, 'templates/story-dev-job.xml')
     response = j.delete('aaa')
     response = j.create_copy('aaa', 'template',
-                        repo='mbf-warehouse-screens',
-                        branch='us544_login',
-                        package='warehouse_screens')
+                             repo='mbf-warehouse-screens',
+                             branch='us544_login',
+                             package='warehouse_screens')
     print(response.status_code)
     if response.status_code == 200:
         j.build('aaa')
