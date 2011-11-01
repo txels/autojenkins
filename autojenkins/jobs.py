@@ -14,7 +14,7 @@ TEST_REPORT = '{0}/job/{1}/lastSuccessfulBuild/testReport' + API
 
 class Jenkins(object):
 
-    def __init__(self, base_url='http://jenkins.pe.local'):
+    def __init__(self, base_url):
         self.ROOT = base_url
 
     def _build_url(self, command, *args):
@@ -64,11 +64,11 @@ class Jenkins(object):
         Create a job from a template job.
         """
         config = self.get_config_xml(template_job)
-        with open('config.xml', 'w') as file:
-            file.write(config)
+        # with open('config.xml', 'w') as file:
+        #    file.write(config)
+
         # remove stupid quotes added by Jenkins
-        config = config.replace('&quot;{{branch}}&quot;',
-                                '{{branch}}')
+        config = config.replace('&quot;{{branch}}&quot;', '{{branch}}')
 
         template_config = Template(config)
         config = template_config.render(**context)

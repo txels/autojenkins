@@ -2,7 +2,7 @@ from autojenkins import Jenkins
 
 
 if __name__ == '__main__':
-    j = Jenkins()
+    j = Jenkins('http://jenkins.pe.local')
     # dir = path.dirname(path.dirname(__file__))
     # config_file = path.join(dir, 'templates/story-dev-job.xml')
     response = j.delete('aaa')
