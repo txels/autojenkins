@@ -68,7 +68,8 @@ class Jenkins(object):
         #    file.write(config)
 
         # remove stupid quotes added by Jenkins
-        config = config.replace('&quot;{{branch}}&quot;', '{{branch}}')
+        config = config.replace('>&quot;{{', '>{{')
+        config = config.replace('}}&quot;<', '}}<')
 
         template_config = Template(config)
         config = template_config.render(**context)
