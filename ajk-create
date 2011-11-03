@@ -1,0 +1,15 @@
+#!/usr/bin/python
+
+from autojenkins.run import *
+
+
+parser = create_opts_parser()
+(options, args) = parser.parse_args()
+if len(args) == 1:
+    jobname = args[0]
+else:
+    jobname = '{0}-{1}'.format(options.repo, options.branch)
+ok = run_jenkins(jobname, options)
+if not ok:
+    parser.print_help()
+

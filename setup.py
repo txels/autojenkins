@@ -7,9 +7,10 @@ from distutils.core import setup
 setup(
     name='autojenkins',
     description='Jenkins Remote Control Library',
-    version='0.1',
+    version='0.2',
     author='Carles Barrobés',
     author_email='carles@barrobes.com',
     packages=['autojenkins'],
     requires=['requests', 'jinja2'],
+    scripts=['ajk-create'],
 )
