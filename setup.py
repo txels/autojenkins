@@ -11,5 +11,5 @@ setup(
     author='Carles Barrobés',
     author_email='carles@barrobes.com',
     packages=['autojenkins'],
-    install_requires=['requests', 'jinja2'],
+    requires=['requests', 'jinja2'],
 )
