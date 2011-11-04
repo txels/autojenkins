@@ -3,3 +3,4 @@
 dist/
 MANIFEST
 _build/
+*.egg-info/
