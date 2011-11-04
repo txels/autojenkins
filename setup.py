@@ -7,7 +7,7 @@ from setuptools import setup
 setup(
     name='autojenkins',
     description='Jenkins Remote Control Library',
-    version='0.3',
+    version='0.4',
     author='Carles Barrobés',
     author_email='carles@barrobes.com',
     packages=['autojenkins'],
