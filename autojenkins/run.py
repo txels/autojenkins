@@ -46,14 +46,3 @@ def run_jenkins(jobname, options):
             j.build(jobname)
     return all_options_ok
 
-
-if __name__ == '__main__':
-    parser = create_opts_parser()
-    (options, args) = parser.parse_args()
-    if len(args) == 1:
-        jobname = args[0]
-    else:
-        jobname = '{0}-{1}'.format(options.repo, options.branch)
-    ok = run_jenkins(jobname, options)
-    if not ok:
-        parser.print_help()
