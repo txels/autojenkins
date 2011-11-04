@@ -13,8 +13,6 @@ def create_opts_parser():
                       help='the repository name in github')
     parser.add_option('--branch',
                       help='the branch name')
-    parser.add_option('--package',
-                      help='the main python package (that contains manage.py)')
     parser.add_option('-t', '--template', default='template',
                       help='the template job to copy from')
     parser.add_option('-b', '--build',
@@ -25,13 +23,12 @@ def create_opts_parser():
 
 def run_jenkins(jobname, options):
     is_not_none = lambda res, opt: res and getattr(options, opt) is not None
-    all_options_ok = reduce(is_not_none, ['repo', 'branch', 'package'])
+    all_options_ok = reduce(is_not_none, ['repo', 'branch'])
     if all_options_ok:
 
         print ("""Creating job '{0}' from template '{1}' for:
     - repo:    {2}
     - branch:  {3}
-    - package: {4}
     """.format(jobname, options.template, options.repo, options.branch,
                options.package))
 

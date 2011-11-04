@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 # # coding: utf-8
 
-from distutils.core import setup
+from setuptools import setup
 
 
 setup(
     name='autojenkins',
     description='Jenkins Remote Control Library',
-    version='0.2',
+    version='0.3',
     author='Carles Barrobés',
     author_email='carles@barrobes.com',
     packages=['autojenkins'],
-    requires=['requests', 'jinja2'],
-    scripts=['ajk-create'],
+    install_requires=['requests', 'jinja2'],
+    scripts=['scripts/ajk-create'],
 )
