@@ -40,7 +40,7 @@ def run_jenkins(jobname, options):
                                        repo=options.repo,
                                        branch=options.branch,
                                        package=options.package)
-        print('Status: ' + response.status_code)
+        print('Status: {0}'.format(response.status_code))
         if response.status_code == 200 and options.build:
             print('Triggering build.')
             j.build(jobname)
