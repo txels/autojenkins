@@ -4,3 +4,4 @@ dist/
 MANIFEST
 _build/
 *.egg-info/
+docs/docs.zip

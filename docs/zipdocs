@@ -1,0 +1,3 @@
+cd _build/html
+zip -r docs.zip *
+mv docs.zip ../..

@@ -13,6 +13,11 @@ Things you can do with it:
 * Obtain latest execution results
 * ...
 
+AutoJenkins may be used as an API or as a command-line tool.
+
+AutoJenkins as API
+------------------
+
 Sample use:
 
 .. code-block:: python 
@@ -45,5 +50,40 @@ Sample use:
     if result == 'SUCCESS':
         j.delete('my-new-job')
 
+AutoJenkins from the Command Line
+---------------------------------
+
+Available commands:
+
+* ``ajk-create`` - create a job in jenkins
+
+Currently it creates a job from a template job, replacing variables that
+use the django/jinja2 syntax ``{{ variable }}``.
+
+Usage help:
+
+.. code-block:: none
+
+    $ ajk-create -h
+
+    Usage: ajk-create host jobname [options]
+
+    Run autojenkins to create a job.
+
+    Options:
+      -h, --help            show this help message and exit
+      -t TEMPLATE, --template=TEMPLATE
+                            the template job to copy from
+      -D PROP=VALUE         substitution variables for the template
+      -b, --build           start a build right after creation
+
+Sample command:
+
+.. code-block:: none
+
+    $ ajk-create http://my.server my-job -t template -Dbranch=my-branch
+
+More Info
+---------
 
 Sources can be found in Github at https://github.com/txels/autojenkins
