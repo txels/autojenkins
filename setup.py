@@ -7,7 +7,7 @@ long_description = open('README.rst').read()
 setup(
     name='autojenkins',
     description='Jenkins Remote Control Library',
-    #long_description=long_description,
+    long_description=long_description,
     version='0.4.1',
     author='Carles Barrobés',
     author_email='carles@barrobes.com',
@@ -15,4 +15,16 @@ setup(
     packages=['autojenkins'],
     install_requires=['requests', 'jinja2'],
     scripts=['scripts/ajk-create'],
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Environment :: Console',
+        'Intended Audience :: Developers',
+        'Intended Audience :: System Administrators',
+        'License :: OSI Approved :: Python Software Foundation License',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Topic :: Software Development :: Build Tools',
+        'Topic :: Software Development :: Libraries',
+    ],
 )
+
