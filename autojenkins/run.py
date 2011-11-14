@@ -28,7 +28,7 @@ def create_job(host, jobname, options):
     """
     Create a new job
     """
-    data = get_properties(options)
+    data = get_variables(options)
 
     print ("""
     Creating job '{0}' from template '{1}' with:
