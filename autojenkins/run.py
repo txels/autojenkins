@@ -39,7 +39,7 @@ def create_job(host, jobname, options):
     response = jenkins.create_copy(jobname, options.template, **data)
     if response.status_code == 200 and options.build:
         print('Triggering build.')
-        j.build(jobname)
+        jenkins.build(jobname)
     return response.status_code
 
 
