@@ -3,11 +3,12 @@ from jinja2 import Template
 
 
 API = '/api/python'
+NEWJOB = '{0}/createItem'
 DELETE = '{0}/job/{1}/doDelete'
 BUILD = '{0}/job/{1}/build'
 CONFIG = '{0}/job/{1}/config.xml'
-NEWJOB = '{0}/createItem'
 JOBINFO = '{0}/job/{1}' + API
+LIST = '{0}' + API
 LAST_SUCCESS = '{0}/job/{1}/lastSuccessfulBuild' + API
 TEST_REPORT = '{0}/job/{1}/lastSuccessfulBuild/testReport' + API
 
@@ -23,6 +24,17 @@ class Jenkins(object):
         Build the proper Jenkins URL for the command.
         """
         return command.format(self.ROOT, *args)
+
+    def all_jobs(self):
+        """
+        Get a list of tuples with (name, color) of all jobs in the server.
+
+        Color is ``blue``, ``yellow`` or ``red`` depending on build results
+        (SUCCESS, UNSTABLE or FAILED).
+        """
+        response = requests.get(self._build_url(LIST))
+        jobs = eval(response.content).get('jobs', [])
+	return [(job['name'], job['color']) for job in jobs]
 
     def job_info(self, jobname):
         """
