@@ -55,12 +55,19 @@ def list_jobs(host):
     """
     List all jobs
     """
-    COLOR = "\033[1;{0}m"
-    COLORCODE = { 'blue': 34, 'red': 31, 'yellow': 33 }
+    COLOR = "\033[{0}m"
+    COLORCODE = { 
+        'blue': '1;34', 
+        'red': '1;31', 
+        'yellow': '1;33', 
+        'aborted': '1;37',
+        'disabled': '0;37',
+        'grey': '1;37',
+    }
 
     print ("All jobs in {0}".format(host))
     jenkins = Jenkins(host)
     jobs = jenkins.all_jobs()
     for name, color in jobs:
-        print(COLOR.format(COLORCODE[color]) + name)
+        print(COLOR.format(COLORCODE[color.split('_')[0]]) + name)
 
