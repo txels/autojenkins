@@ -1,2 +1,4 @@
+nose
+mock
 Sphinx
 pep8

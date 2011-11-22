@@ -1,0 +1,14 @@
+#!/usr/bin/python
+
+from autojenkins.run import *
+
+
+parser = create_opts_parser('delete')
+
+(options, args) = parser.parse_args()
+
+if len(args) == 1:
+    host = args[0]
+    list_jobs(host)
+else:
+    parser.print_help()

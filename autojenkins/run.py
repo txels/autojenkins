@@ -7,11 +7,9 @@ def create_opts_parser(command):
     """
     Create parser for command-line options
     """
-    usage = "Usage: %prog host jobname [options]"
+    usage = "Usage: %prog host [jobname] [options]"
     desc = 'Run autojenkins to {0} a job.'.format(command)
     parser = optparse.OptionParser(description=desc, usage=usage)
-    #parser.add_option('jobname',
-    #                    help='the name of a job in jenkins')
     return parser
 
 
@@ -52,3 +50,17 @@ def delete_job(host, jobname):
     jenkins = Jenkins(host)
     response = jenkins.delete(jobname)
     print('Status: {0}'.format(response.status_code))
+
+def list_jobs(host):
+    """
+    List all jobs
+    """
+    COLOR = "\033[1;{0}m"
+    COLORCODE = { 'blue': 34, 'red': 31, 'yellow': 33 }
+
+    print ("All jobs in {0}".format(host))
+    jenkins = Jenkins(host)
+    jobs = jenkins.all_jobs()
+    for name, color in jobs:
+        print(COLOR.format(COLORCODE[color]) + name)
+
