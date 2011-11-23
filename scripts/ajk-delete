@@ -3,7 +3,7 @@
 from autojenkins.run import *
 
 
-parser = create_opts_parser('delete')
+parser = create_opts_parser('delete a job')
 
 (options, args) = parser.parse_args()
 

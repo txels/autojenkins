@@ -3,7 +3,7 @@
 from autojenkins.run import *
 
 
-parser = create_opts_parser('create')
+parser = create_opts_parser('create a job')
 parser.add_option('-D', metavar='VAR=VALUE',
                   action="append",
                   help='substitution variables to be used in the template')

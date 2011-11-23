@@ -3,12 +3,12 @@ import optparse
 from autojenkins import Jenkins
 
 
-def create_opts_parser(command):
+def create_opts_parser(command, params="[jobname] [options]"):
     """
     Create parser for command-line options
     """
-    usage = "Usage: %prog host [jobname] [options]"
-    desc = 'Run autojenkins to {0} a job.'.format(command)
+    usage = "Usage: %prog host " + params
+    desc = 'Run autojenkins to {0}.'.format(command)
     parser = optparse.OptionParser(description=desc, usage=usage)
     return parser
 
