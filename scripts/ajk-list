@@ -4,11 +4,14 @@ from autojenkins.run import *
 
 
 parser = create_opts_parser('list all jobs', params='')
+parser.add_option('-n', '--no-color',
+                  action="store_true", dest="color", default=False,
+                  help='do not use colored output')
 
 (options, args) = parser.parse_args()
 
 if len(args) == 1:
     host = args[0]
-    list_jobs(host)
+    list_jobs(host, not options.color)
 else:
     parser.print_help()

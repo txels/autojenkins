@@ -8,7 +8,7 @@ setup(
     name='autojenkins',
     description='Jenkins Remote Control Library',
     long_description=long_description,
-    version='0.4.5',
+    version='0.4.6',
     author='Carles Barrobés',
     author_email='carles@barrobes.com',
     url='https://github.com/txels/autojenkins',
