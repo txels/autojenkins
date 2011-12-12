@@ -1,0 +1,18 @@
+Source: python-autojenkins
+Section: python
+Priority: optional
+Maintainer: Daniel Watkins <daniel@daniel-watkins.co.uk>
+Build-Depends:
+ debhelper (>= 7),
+ python-all (>= 2.6)
+
+Package: python-autojenkins
+Architecture: all
+Depends: python-requests, python-jinja2, ${misc:Depends}, ${python:Depends}
+Description: Jenkins Remote Control Library
+ Automation (remote control) of Jenkins tasks. Things you can do with it:
+ * Create a job (e.g. from a template job)
+ * Delete a job
+ * Obtain the config.xml file for that job
+ * Trigger building of a job
+ * Obtain latest execution results
