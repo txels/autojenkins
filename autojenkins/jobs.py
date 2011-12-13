@@ -19,6 +19,9 @@ class Jenkins(object):
     def __init__(self, base_url):
         self.ROOT = base_url
 
+    def auth(self, user, passwd):
+        self.auth = (user, passwd)
+
     def _build_url(self, command, *args):
         """
         Build the proper Jenkins URL for the command.
@@ -32,7 +35,7 @@ class Jenkins(object):
         Color is ``blue``, ``yellow`` or ``red`` depending on build results
         (SUCCESS, UNSTABLE or FAILED).
         """
-        response = requests.get(self._build_url(LIST))
+        response = requests.get(self._build_url(LIST), auth = self.auth)
         jobs = eval(response.content).get('jobs', [])
 	return [(job['name'], job['color']) for job in jobs]
 
@@ -40,21 +43,21 @@ class Jenkins(object):
         """
         Get all information for a job as a Python object (dicts & lists).
         """
-        response = requests.get(self._build_url(JOBINFO, jobname))
+        response = requests.get(self._build_url(JOBINFO, jobname), auth=self.auth)
         return eval(response.content)
 
     def get_config_xml(self, jobname):
         """
         Get the ``config.xml`` file that contains the job definition.
         """
-        response = requests.get(self._build_url(CONFIG, jobname))
+        response = requests.get(self._build_url(CONFIG, jobname), auth=self.auth)
         return response.content
 
     def build(self, jobname):
         """
         Trigger Jenkins to build a job.
         """
-        return requests.post(self._build_url(BUILD, jobname))
+        return requests.post(self._build_url(BUILD, jobname), auth=self.auth)
 
     def create(self, jobname, config_file, **context):
         """
@@ -70,7 +73,8 @@ class Jenkins(object):
         return requests.post(self._build_url(NEWJOB),
                              data=content,
                              params=params,
-                             headers={'Content-Type': 'application/xml'})
+                             headers={'Content-Type': 'application/xml'},
+                             auth=self.auth)
 
     def create_copy(self, jobname, template_job, enable=True, **context):
         """
@@ -93,31 +97,32 @@ class Jenkins(object):
         return requests.post(self._build_url(NEWJOB),
                              data=config,
                              params={'name': jobname},
-                             headers={'Content-Type': 'application/xml'})
+                             headers={'Content-Type': 'application/xml'},
+                             auth=self.auth)
 
     def copy(self, jobname, copy_from='template'):
         """
         Copy a job from another one (by default from one called ``template``).
         """
         params = {'name': jobname, 'mode': 'copy', 'from': copy_from}
-        return requests.post(self._build_url(NEWJOB), params=params)
+        return requests.post(self._build_url(NEWJOB), params=params, auth=self.auth)
 
     def delete(self, jobname):
         """
         Delete a job.
         """
-        return requests.post(self._build_url(DELETE, jobname))
+        return requests.post(self._build_url(DELETE, jobname), auth=self.auth)
 
     def last_success(self, jobname):
         """
         Return information about the last successful build.
         """
-        return requests.post(self._build_url(LAST_SUCCESS, jobname))
+        return requests.post(self._build_url(LAST_SUCCESS, jobname), auth=self.auth)
 
     def last_result(self, jobname):
         """
         Obtain results from last execution.
         """
         last_result_url = self.job_info(jobname)['lastBuild']['url']
-        response = requests.get(last_result_url + API)
+        response = requests.get(last_result_url + API, auth=self.auth)
         return eval(response.content)
