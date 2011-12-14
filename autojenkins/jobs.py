@@ -16,11 +16,9 @@ TEST_REPORT = '{0}/job/{1}/lastSuccessfulBuild/testReport' + API
 class Jenkins(object):
     """Main class to interact with a Jenkins server."""
 
-    def __init__(self, base_url):
+    def __init__(self, base_url, auth=None):
         self.ROOT = base_url
-
-    def auth(self, user, passwd):
-        self.auth = (user, passwd)
+        self.auth = auth
 
     def _build_url(self, command, *args):
         """
