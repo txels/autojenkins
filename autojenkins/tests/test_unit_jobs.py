@@ -18,5 +18,6 @@ class TestJenkins(TestCase):
         response.content = "{'jobs':[{'name': 'job1', 'color': 'blue'}]}"
         requests.get.return_value = response
         jobs = self.jenkins.all_jobs()
-        requests.get.assert_called_once_with('http://jenkins/api/python')
+        requests.get.assert_called_once_with('http://jenkins/api/python',
+                                             auth=None)
         self.assertEqual(jobs, [('job1', 'blue')])

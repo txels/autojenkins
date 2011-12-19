@@ -35,7 +35,7 @@ class Jenkins(object):
         Color is ``blue``, ``yellow`` or ``red`` depending on build results
         (SUCCESS, UNSTABLE or FAILED).
         """
-        response = requests.get(self._build_url(LIST), auth = self.auth)
+        response = requests.get(self._build_url(LIST), auth=self.auth)
         jobs = eval(response.content).get('jobs', [])
         return [(job['name'], job['color']) for job in jobs]
 
@@ -43,7 +43,8 @@ class Jenkins(object):
         """
         Get all information for a job as a Python object (dicts & lists).
         """
-        response = requests.get(self._build_url(JOBINFO, jobname), auth=self.auth)
+        response = requests.get(self._build_url(JOBINFO, jobname),
+                                auth=self.auth)
         return eval(response.content)
 
     def last_build_info(self, jobname):
@@ -64,14 +65,16 @@ class Jenkins(object):
         """
         Get the ``config.xml`` file that contains the job definition.
         """
-        response = requests.get(self._build_url(CONFIG, jobname), auth=self.auth)
+        response = requests.get(self._build_url(CONFIG, jobname),
+                                auth=self.auth)
         return response.content
 
     def build(self, jobname):
         """
         Trigger Jenkins to build a job.
         """
-        return requests.post(self._build_url(BUILD, jobname), auth=self.auth)
+        return requests.post(self._build_url(BUILD, jobname),
+                             auth=self.auth)
 
     def create(self, jobname, config_file, **context):
         """
@@ -119,7 +122,8 @@ class Jenkins(object):
         Copy a job from another one (by default from one called ``template``).
         """
         params = {'name': jobname, 'mode': 'copy', 'from': copy_from}
-        return requests.post(self._build_url(NEWJOB), params=params, auth=self.auth)
+        return requests.post(self._build_url(NEWJOB), params=params,
+                             auth=self.auth)
 
     def delete(self, jobname):
         """
@@ -131,7 +135,8 @@ class Jenkins(object):
         """
         Return information about the last successful build.
         """
-        return requests.post(self._build_url(LAST_SUCCESS, jobname), auth=self.auth)
+        return requests.post(self._build_url(LAST_SUCCESS, jobname),
+                             auth=self.auth)
 
     def last_result(self, jobname):
         """
