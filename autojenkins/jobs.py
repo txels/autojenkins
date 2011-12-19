@@ -11,6 +11,8 @@ JOBINFO = '{0}/job/{1}' + API
 LIST = '{0}' + API
 LAST_SUCCESS = '{0}/job/{1}/lastSuccessfulBuild' + API
 TEST_REPORT = '{0}/job/{1}/lastSuccessfulBuild/testReport' + API
+LAST_BUILD = '{0}/job/{1}/lastBuild' + API
+LAST_REPORT = '{0}/job/{1}/lastBuild/testReport' + API
 
 
 class Jenkins(object):
@@ -34,13 +36,27 @@ class Jenkins(object):
         """
         response = requests.get(self._build_url(LIST))
         jobs = eval(response.content).get('jobs', [])
-	return [(job['name'], job['color']) for job in jobs]
+        return [(job['name'], job['color']) for job in jobs]
 
     def job_info(self, jobname):
         """
         Get all information for a job as a Python object (dicts & lists).
         """
         response = requests.get(self._build_url(JOBINFO, jobname))
+        return eval(response.content)
+
+    def last_build_info(self, jobname):
+        """
+        Get information for last build of a job.
+        """
+        response = requests.get(self._build_url(LAST_BUILD, jobname))
+        return eval(response.content)
+
+    def last_build_report(self, jobname):
+        """
+        Get full report of last build.
+        """
+        response = requests.get(self._build_url(LAST_REPORT, jobname))
         return eval(response.content)
 
     def get_config_xml(self, jobname):

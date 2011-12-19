@@ -2,10 +2,10 @@ import optparse
 
 from autojenkins import Jenkins
 
-COLOR_MEANING = { 
-    'blue': ('1;34', 'SUCCESS'), 
-    'red': ('1;31', 'FAILED'), 
-    'yellow': ('1;33', 'UNSTABLE'), 
+COLOR_MEANING = {
+    'blue': ('1;34', 'SUCCESS'),
+    'red': ('1;31', 'FAILED'),
+    'yellow': ('1;33', 'UNSTABLE'),
     'aborted': ('1;37', 'ABORTED'),
     'disabled': ('0;37', 'DISABLED'),
     'grey': ('1;37', 'NOT BUILT'),
@@ -83,4 +83,3 @@ def list_jobs(host, color=True):
         prefix = '* ' if building else '  '
         out = COLOR_MEANING[color][position]
         print(prefix + FORMAT.format(out, name))
-
