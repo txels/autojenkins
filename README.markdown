@@ -42,3 +42,11 @@ Sample use:
     result = j.last_result('my-new-job')['result']
     if result == 'SUCCESS':
         j.delete('my-new-job')
+
+Authentication:
+
+    If your Jenkins server uses authentication, you can use HTTP basic authentication in this way:
+
+        jenkins = Jenkins('http://jenkins', auth=('user', 'pass'))
+
+    Note that you can use either a cleartext password or a Jenkins API token as the password.
