@@ -13,3 +13,4 @@ Things you can do with it:
 
 AutoJenkins can be used both as an API and a command-line tool.
 
+Supports non-authenticated as well as authenticated servers.
