@@ -12,6 +12,7 @@ LIST = '{0}' + API
 LAST_SUCCESS = '{0}/job/{1}/lastSuccessfulBuild' + API
 TEST_REPORT = '{0}/job/{1}/lastSuccessfulBuild/testReport' + API
 LAST_BUILD = '{0}/job/{1}/lastBuild' + API
+SPECIFIC_BUILD = '{0}/job/{1}/{2}' + API
 LAST_REPORT = '{0}/job/{1}/lastBuild/testReport' + API
 
 
@@ -52,6 +53,14 @@ class Jenkins(object):
         Get information for last build of a job.
         """
         response = requests.get(self._build_url(LAST_BUILD, jobname))
+        return eval(response.content)
+
+    def specific_build_info(self, jobname, build_number):
+        """
+        Get information for a specific build of a job.
+        """
+        response = requests.get(self._build_url(SPECIFIC_BUILD, jobname, build_number),
+                                auth=self.auth)
         return eval(response.content)
 
     def last_build_report(self, jobname):
@@ -145,3 +154,4 @@ class Jenkins(object):
         last_result_url = self.job_info(jobname)['lastBuild']['url']
         response = requests.get(last_result_url + API, auth=self.auth)
         return eval(response.content)
+
