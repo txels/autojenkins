@@ -91,7 +91,8 @@ class Commands:
         parser = create_opts_parser('create a job')
         parser.add_option('-D', metavar='VAR=VALUE',
                           action="append",
-                          help='substitution variables to be used in the template')
+                          help='substitution variables to be used in the '
+                               'template')
         parser.add_option('-t', '--template', default='template',
                           help='the template job to copy from')
         parser.add_option('-b', '--build',

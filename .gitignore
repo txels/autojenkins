@@ -7,3 +7,10 @@ build/
 *.egg-info/
 docs/docs.zip
 *~
+cover/
+.coverage
+coverage.xml
+docs/sphinx-output
+nosetests.xml
+pep8.txt
+
