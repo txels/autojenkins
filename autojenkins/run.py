@@ -11,7 +11,7 @@ COLOR_MEANING = {
     'grey': ('1;37', 'NOT BUILT'),
 }
 
- 
+
 def create_opts_parser(command, params="[jobname] [options]"):
     """
     Create parser for command-line options
@@ -83,3 +83,52 @@ def list_jobs(host, color=True):
         prefix = '* ' if building else '  '
         out = COLOR_MEANING[color][position]
         print(prefix + FORMAT.format(out, name))
+
+
+class Commands:
+    @staticmethod
+    def create():
+        parser = create_opts_parser('create a job')
+        parser.add_option('-D', metavar='VAR=VALUE',
+                          action="append",
+                          help='substitution variables to be used in the template')
+        parser.add_option('-t', '--template', default='template',
+                          help='the template job to copy from')
+        parser.add_option('-b', '--build',
+                          action="store_true", dest="build", default=False,
+                          help='start a build right after creation')
+
+        (options, args) = parser.parse_args()
+
+        if len(args) == 2:
+            host, jobname = args
+            create_job(host, jobname, options)
+        else:
+            parser.print_help()
+
+    @staticmethod
+    def delete():
+        parser = create_opts_parser('delete a job')
+
+        (options, args) = parser.parse_args()
+
+        if len(args) == 2:
+            host, jobname = args
+            delete_job(host, jobname)
+        else:
+            parser.print_help()
+
+    @staticmethod
+    def list():
+        parser = create_opts_parser('list all jobs', params='')
+        parser.add_option('-n', '--no-color',
+                          action="store_true", dest="color", default=False,
+                          help='do not use colored output')
+
+        (options, args) = parser.parse_args()
+
+        if len(args) == 1:
+            host, = args
+            list_jobs(host, not options.color)
+        else:
+            parser.print_help()

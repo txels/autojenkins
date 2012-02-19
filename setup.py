@@ -14,15 +14,17 @@ setup(
     url='https://github.com/txels/autojenkins',
     packages=['autojenkins'],
     install_requires=['requests', 'jinja2'],
-    scripts=[
-        'scripts/ajk-create', 
-        'scripts/ajk-delete',
-        'scripts/ajk-list',
-    ],
+    entry_points = dict(
+        console_scripts = [
+            'ajk-create = autojenkins.run:Commands.create',
+            'ajk-delete = autojenkins.run:Commands.delete',
+            'ajk-list = autojenkins.run:Commands.list',
+        ],
+    ),
     #include_package_data=True,
     package_data = {
         '': ['*.txt', '*.rst'],
-    }, 
+    },
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
