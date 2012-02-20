@@ -55,9 +55,45 @@ AutoJenkins from the Command Line
 
 Available commands:
 
-* ``ajk-create`` - create a job in jenkins
+* ``ajk-list`` - list all jobs in a server
+* ``ajk-create`` - create a job
+* ``ajk-delete`` - delete a job
 
-Currently it creates a job from a template job, replacing variables that
+``ajk-list``
+~~~~~~~~~~~~
+
+List all jobs in a Jenkins server. Each line in the output represents
+a job, and is colored according to the job's last build state:
+
+* Blue: success
+* Yellow: unstable
+* Red: failure
+* Gray: not built
+
+A ``*`` symbol next to a job name indicates that the job is being built
+right now.
+
+If instead of colored output, you prefer a string stating the status
+of the build, use the ``--no-color`` option. This is useful if you
+e.g. want to pipe the output into a ``grep`` command that filters
+jobs depending on status.
+
+.. code-block:: none
+
+    $ ajk-list -h
+
+    Usage: ajk-list host
+
+    Run autojenkins to list all jobs.
+
+    Options:
+      -h, --help      show this help message and exit
+      -n, --no-color  do not use colored output
+
+``ajk-create``
+~~~~~~~~~~~~~~
+
+Create a job from a template job, replacing variables that
 use the django/jinja2 syntax ``{{ variable }}``.
 
 Usage help:
@@ -82,6 +118,22 @@ Sample command:
 .. code-block:: none
 
     $ ajk-create http://my.server my-job -t template -Dbranch=my-branch
+
+``ajk-delete``
+~~~~~~~~~~~~~~
+
+Delete a job from a Jenkins server.
+
+Usage help:
+
+.. code-block:: none
+
+    Usage: ajk-delete host [jobname] [options]
+
+    Run autojenkins to delete a job.
+
+    Options:
+      -h, --help  show this help message and exit
 
 More Info
 ---------
