@@ -6,6 +6,7 @@ Things you can do with it:
 
 * Create a job (e.g. from a template job)
 * Delete a job
+* Enable or disable a job
 * Obtain the ``config.xml`` file for that job
 * Trigger building of a job
 * Obtain latest execution results

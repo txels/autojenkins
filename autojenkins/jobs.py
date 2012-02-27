@@ -13,6 +13,8 @@ LAST_SUCCESS = '{0}/job/{1}/lastSuccessfulBuild' + API
 TEST_REPORT = '{0}/job/{1}/lastSuccessfulBuild/testReport' + API
 LAST_BUILD = '{0}/job/{1}/lastBuild' + API
 LAST_REPORT = '{0}/job/{1}/lastBuild/testReport' + API
+ENABLE = '{0}/job/{1}/enable' + API
+DISABLE = '{0}/job/{1}/disable' + API
 
 
 class Jenkins(object):
@@ -145,3 +147,16 @@ class Jenkins(object):
         last_result_url = self.job_info(jobname)['lastBuild']['url']
         response = requests.get(last_result_url + API, auth=self.auth)
         return eval(response.content)
+
+    def enable(self, jobname):
+        """
+        Trigger Jenkins to enable a job.
+        """
+        return requests.post(self._build_url(ENABLE, jobname), auth=self.auth)
+
+    def disable(self, jobname):
+        """
+        Trigger Jenkins to disable a job.
+        """
+        return requests.post(self._build_url(DISABLE, jobname), auth=self.auth)
+

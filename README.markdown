@@ -38,6 +38,10 @@ Sample use:
     # build
     j.build('my-new-job')
 
+    # enable or disable
+    j.enable('my-new-job')
+    j.disable('my-new-job')
+
     # check result and delete if successful:
     result = j.last_result('my-new-job')['result']
     if result == 'SUCCESS':
