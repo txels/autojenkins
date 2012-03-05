@@ -34,15 +34,6 @@ class TestJenkins(TestCase):
         super(TestJenkins, self).setUp()
         self.jenkins = Jenkins('http://jenkins')
 
-    def check_result(self, info, route, value):
-        for key in route:
-            info = info[key]
-        self.assertEqual(info, value)
-
-    def check_results(self, info, values):
-        for route, value in values:
-            self.check_result(info, route, value)
-
     def test_all_jobs(self, requests, Template):
         requests.get.return_value = mock_response()
         jobs = self.jenkins.all_jobs()
@@ -63,6 +54,15 @@ class TestJenkins(TestCase):
             'http://jenkins/' + url.format('name'),
             auth=None)
         getattr(self, 'checks_{0}'.format(method))(info)
+
+    def check_result(self, info, route, value):
+        for key in route:
+            info = info[key]
+        self.assertEqual(info, value)
+
+    def check_results(self, info, values):
+        for route, value in values:
+            self.check_result(info, route, value)
 
     def checks_job_info(self, info):
         self.check_results(info,
