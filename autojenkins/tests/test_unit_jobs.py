@@ -7,7 +7,9 @@ from nose.tools import assert_equal
 
 from autojenkins.jobs import Jenkins
 
+
 fixture_path = path.dirname(__file__)
+
 
 def load_fixture(name):
     with open(path.join(fixture_path, name)) as f:
@@ -44,7 +46,7 @@ class TestJenkins(TestCase):
         ('job_info', 'job/{0}/api/python'),
         ('last_build_info', 'job/{0}/lastBuild/api/python'),
         ('last_build_report', 'job/{0}/lastBuild/testReport/api/python'),
-    ) 
+    )
     def test_get_methods_with_jobname(self, case, requests, Template):
         method, url = case
         requests.get.return_value = mock_response('{0}.txt'.format(method))
@@ -85,4 +87,3 @@ class TestJenkins(TestCase):
              (('failCount',), 1),
              (('suites', 0, 'name'), 'org.apache.solr.BasicFunctionalityTest'),
             ])
-

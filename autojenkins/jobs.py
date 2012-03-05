@@ -160,4 +160,3 @@ class Jenkins(object):
         Trigger Jenkins to disable a job.
         """
         return requests.post(self._build_url(DISABLE, jobname), auth=self.auth)
-
