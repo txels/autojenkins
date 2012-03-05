@@ -24,7 +24,6 @@ def mock_response(fixture=None):
     return response
 
 
-
 @ddt
 @patch('autojenkins.jobs.Template')
 @patch('autojenkins.jobs.requests')
@@ -46,7 +45,7 @@ class TestJenkins(TestCase):
         ('last_build_info', 'job/{0}/lastBuild/api/python'),
         ('last_build_report', 'job/{0}/lastBuild/testReport/api/python'),
     ) 
-    def test_method_accepting_jobname(self, case, requests, Template):
+    def test_get_methods_with_jobname(self, case, requests, Template):
         method, url = case
         requests.get.return_value = mock_response('{0}.txt'.format(method))
         info = getattr(self.jenkins, method)('name')
