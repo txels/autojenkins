@@ -30,6 +30,10 @@ class Jenkins(object):
         """
         return command.format(self.ROOT, *args)
 
+    def _get(self, url_pattern, *args):
+        return requests.get(self._build_url(url_pattern, *args),
+                            auth=self.auth)
+
     def all_jobs(self):
         """
         Get a list of tuples with (name, color) of all jobs in the server.
@@ -37,7 +41,7 @@ class Jenkins(object):
         Color is ``blue``, ``yellow`` or ``red`` depending on build results
         (SUCCESS, UNSTABLE or FAILED).
         """
-        response = requests.get(self._build_url(LIST), auth=self.auth)
+        response = self._get(LIST)
         jobs = eval(response.content).get('jobs', [])
         return [(job['name'], job['color']) for job in jobs]
 
@@ -45,30 +49,28 @@ class Jenkins(object):
         """
         Get all information for a job as a Python object (dicts & lists).
         """
-        response = requests.get(self._build_url(JOBINFO, jobname),
-                                auth=self.auth)
+        response = self._get(JOBINFO, jobname)
         return eval(response.content)
 
     def last_build_info(self, jobname):
         """
         Get information for last build of a job.
         """
-        response = requests.get(self._build_url(LAST_BUILD, jobname))
+        response = self._get(LAST_BUILD, jobname)
         return eval(response.content)
 
     def last_build_report(self, jobname):
         """
         Get full report of last build.
         """
-        response = requests.get(self._build_url(LAST_REPORT, jobname))
+        response = self._get(LAST_REPORT, jobname)
         return eval(response.content)
 
     def get_config_xml(self, jobname):
         """
         Get the ``config.xml`` file that contains the job definition.
         """
-        response = requests.get(self._build_url(CONFIG, jobname),
-                                auth=self.auth)
+        response = self._get(CONFIG, jobname)
         return response.content
 
     def build(self, jobname):
@@ -131,7 +133,8 @@ class Jenkins(object):
         """
         Delete a job.
         """
-        return requests.post(self._build_url(DELETE, jobname), auth=self.auth)
+        return requests.post(self._build_url(DELETE, jobname),
+                             auth=self.auth)
 
     def last_success(self, jobname):
         """
