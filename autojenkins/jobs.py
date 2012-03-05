@@ -102,8 +102,6 @@ class Jenkins(object):
         Create a job from a template job.
         """
         config = self.get_config_xml(template_job)
-        # with open('config.xml', 'w') as file:
-        #    file.write(config)
 
         # remove stupid quotes added by Jenkins
         config = config.replace('>&quot;{{', '>{{')
