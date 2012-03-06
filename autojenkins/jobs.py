@@ -13,8 +13,8 @@ LAST_SUCCESS = '{0}/job/{1}/lastSuccessfulBuild' + API
 TEST_REPORT = '{0}/job/{1}/lastSuccessfulBuild/testReport' + API
 LAST_BUILD = '{0}/job/{1}/lastBuild' + API
 LAST_REPORT = '{0}/job/{1}/lastBuild/testReport' + API
-ENABLE = '{0}/job/{1}/enable' + API
-DISABLE = '{0}/job/{1}/disable' + API
+ENABLE = '{0}/job/{1}/enable'
+DISABLE = '{0}/job/{1}/disable'
 
 
 class Jenkins(object):
@@ -66,19 +66,27 @@ class Jenkins(object):
         response = self._get(LAST_REPORT, jobname)
         return eval(response.content)
 
+    def last_result(self, jobname):
+        """
+        Obtain results from last execution.
+        """
+        last_result_url = self.job_info(jobname)['lastBuild']['url']
+        response = requests.get(last_result_url + API, auth=self.auth)
+        return eval(response.content)
+
+    def last_success(self, jobname):
+        """
+        Return information about the last successful build.
+        """
+        response = self._get(LAST_SUCCESS, jobname)
+        return eval(response.content)
+
     def get_config_xml(self, jobname):
         """
         Get the ``config.xml`` file that contains the job definition.
         """
         response = self._get(CONFIG, jobname)
         return response.content
-
-    def build(self, jobname):
-        """
-        Trigger Jenkins to build a job.
-        """
-        return requests.post(self._build_url(BUILD, jobname),
-                             auth=self.auth)
 
     def create(self, jobname, config_file, **context):
         """
@@ -127,27 +135,19 @@ class Jenkins(object):
         return requests.post(self._build_url(NEWJOB), params=params,
                              auth=self.auth)
 
+    def build(self, jobname):
+        """
+        Trigger Jenkins to build a job.
+        """
+        return requests.post(self._build_url(BUILD, jobname),
+                             auth=self.auth)
+
     def delete(self, jobname):
         """
         Delete a job.
         """
         return requests.post(self._build_url(DELETE, jobname),
                              auth=self.auth)
-
-    def last_success(self, jobname):
-        """
-        Return information about the last successful build.
-        """
-        return requests.post(self._build_url(LAST_SUCCESS, jobname),
-                             auth=self.auth)
-
-    def last_result(self, jobname):
-        """
-        Obtain results from last execution.
-        """
-        last_result_url = self.job_info(jobname)['lastBuild']['url']
-        response = requests.get(last_result_url + API, auth=self.auth)
-        return eval(response.content)
 
     def enable(self, jobname):
         """
