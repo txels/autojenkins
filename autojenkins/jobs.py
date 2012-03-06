@@ -34,6 +34,10 @@ class Jenkins(object):
         return requests.get(self._build_url(url_pattern, *args),
                             auth=self.auth)
 
+    def _post(self, url_pattern, *args):
+        return requests.post(self._build_url(url_pattern, *args),
+                            auth=self.auth)
+
     def all_jobs(self):
         """
         Get a list of tuples with (name, color) of all jobs in the server.
@@ -139,24 +143,22 @@ class Jenkins(object):
         """
         Trigger Jenkins to build a job.
         """
-        return requests.post(self._build_url(BUILD, jobname),
-                             auth=self.auth)
+        return self._post(BUILD, jobname)
 
     def delete(self, jobname):
         """
         Delete a job.
         """
-        return requests.post(self._build_url(DELETE, jobname),
-                             auth=self.auth)
+        return self._post(DELETE, jobname)
 
     def enable(self, jobname):
         """
         Trigger Jenkins to enable a job.
         """
-        return requests.post(self._build_url(ENABLE, jobname), auth=self.auth)
+        return self._post(ENABLE, jobname)
 
     def disable(self, jobname):
         """
         Trigger Jenkins to disable a job.
         """
-        return requests.post(self._build_url(DISABLE, jobname), auth=self.auth)
+        return self._post(DISABLE, jobname)
