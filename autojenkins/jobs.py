@@ -13,6 +13,8 @@ LAST_SUCCESS = '{0}/job/{1}/lastSuccessfulBuild' + API
 TEST_REPORT = '{0}/job/{1}/lastSuccessfulBuild/testReport' + API
 LAST_BUILD = '{0}/job/{1}/lastBuild' + API
 LAST_REPORT = '{0}/job/{1}/lastBuild/testReport' + API
+ENABLE = '{0}/job/{1}/enable'
+DISABLE = '{0}/job/{1}/disable'
 
 
 class Jenkins(object):
@@ -34,6 +36,14 @@ class Jenkins(object):
         """
         return command.format(root, *args)
 
+    def _get(self, url_pattern, *args):
+        return requests.get(self._build_url(url_pattern, *args),
+                            auth=self.auth)
+
+    def _post(self, url_pattern, *args):
+        return requests.post(self._build_url(url_pattern, *args),
+                            auth=self.auth)
+
     def all_jobs(self):
         """
         Get a list of tuples with (name, color) of all jobs in the server.
@@ -41,7 +51,7 @@ class Jenkins(object):
         Color is ``blue``, ``yellow`` or ``red`` depending on build results
         (SUCCESS, UNSTABLE or FAILED).
         """
-        response = requests.get(self._build_url(LIST), auth=self.auth)
+        response = self._get(LIST)
         jobs = eval(response.content).get('jobs', [])
         return [(job['name'], job['color']) for job in jobs]
 
@@ -49,38 +59,44 @@ class Jenkins(object):
         """
         Get all information for a job as a Python object (dicts & lists).
         """
-        response = requests.get(self._build_url(JOBINFO, jobname),
-                                auth=self.auth)
+        response = self._get(JOBINFO, jobname)
         return eval(response.content)
 
     def last_build_info(self, jobname):
         """
         Get information for last build of a job.
         """
-        response = requests.get(self._build_url(LAST_BUILD, jobname))
+        response = self._get(LAST_BUILD, jobname)
         return eval(response.content)
 
     def last_build_report(self, jobname):
         """
         Get full report of last build.
         """
-        response = requests.get(self._build_url(LAST_REPORT, jobname))
+        response = self._get(LAST_REPORT, jobname)
+        return eval(response.content)
+
+    def last_result(self, jobname):
+        """
+        Obtain results from last execution.
+        """
+        last_result_url = self.job_info(jobname)['lastBuild']['url']
+        response = requests.get(last_result_url + API, auth=self.auth)
+        return eval(response.content)
+
+    def last_success(self, jobname):
+        """
+        Return information about the last successful build.
+        """
+        response = self._get(LAST_SUCCESS, jobname)
         return eval(response.content)
 
     def get_config_xml(self, jobname):
         """
         Get the ``config.xml`` file that contains the job definition.
         """
-        response = requests.get(self._build_url(CONFIG, jobname),
-                                auth=self.auth)
+        response = self._get(CONFIG, jobname)
         return response.content
-
-    def build(self, jobname):
-        """
-        Trigger Jenkins to build a job.
-        """
-        return requests.post(self._build_url(BUILD, jobname),
-                             auth=self.auth)
 
     def create(self, jobname, config_file, **context):
         """
@@ -104,8 +120,6 @@ class Jenkins(object):
         Create a job from a template job.
         """
         config = self.get_config_xml(template_job)
-        # with open('config.xml', 'w') as file:
-        #    file.write(config)
 
         # remove stupid quotes added by Jenkins
         config = config.replace('>&quot;{{', '>{{')
@@ -123,20 +137,16 @@ class Jenkins(object):
                              headers={'Content-Type': 'application/xml'},
                              auth=self.auth)
 
-    def transfer(self, jobname, to_server, **context):
+    def transfer(self, jobname, to_server):
         """
         Copy a job to another server.
         """
         config = self.get_config_xml(jobname)
-        config = config.replace('<disabled>false</disabled>',
-                                '<disabled>true</disabled>')
-
         return requests.post(self._other_url(to_server, NEWJOB),
                              data=config,
                              params={'name': jobname},
                              headers={'Content-Type': 'application/xml'},
                              auth=self.auth)
-
 
     def copy(self, jobname, copy_from='template'):
         """
@@ -146,23 +156,26 @@ class Jenkins(object):
         return requests.post(self._build_url(NEWJOB), params=params,
                              auth=self.auth)
 
+    def build(self, jobname):
+        """
+        Trigger Jenkins to build a job.
+        """
+        return self._post(BUILD, jobname)
+
     def delete(self, jobname):
         """
         Delete a job.
         """
-        return requests.post(self._build_url(DELETE, jobname), auth=self.auth)
+        return self._post(DELETE, jobname)
 
-    def last_success(self, jobname):
+    def enable(self, jobname):
         """
-        Return information about the last successful build.
+        Trigger Jenkins to enable a job.
         """
-        return requests.post(self._build_url(LAST_SUCCESS, jobname),
-                             auth=self.auth)
+        return self._post(ENABLE, jobname)
 
-    def last_result(self, jobname):
+    def disable(self, jobname):
         """
-        Obtain results from last execution.
+        Trigger Jenkins to disable a job.
         """
-        last_result_url = self.job_info(jobname)['lastBuild']['url']
-        response = requests.get(last_result_url + API, auth=self.auth)
-        return eval(response.content)
+        return self._post(DISABLE, jobname)

@@ -2,13 +2,15 @@
 # # coding: utf-8
 
 from setuptools import setup
-long_description = open('README.rst').read()
+
+from autojenkins import __version__
+
 
 setup(
     name='autojenkins',
     description='Jenkins Remote Control Library',
-    long_description=long_description,
-    version='0.5.1',
+    long_description=open('README.rst').read(),
+    version=__version__,
     author='Carles Barrobés',
     author_email='carles@barrobes.com',
     url='https://github.com/txels/autojenkins',
