@@ -28,6 +28,12 @@ class Jenkins(object):
         """
         return command.format(self.ROOT, *args)
 
+    def _other_url(self, root, command, *args):
+        """
+        Build the proper Jenkins URL for the command.
+        """
+        return command.format(root, *args)
+
     def all_jobs(self):
         """
         Get a list of tuples with (name, color) of all jobs in the server.
@@ -116,6 +122,21 @@ class Jenkins(object):
                              params={'name': jobname},
                              headers={'Content-Type': 'application/xml'},
                              auth=self.auth)
+
+    def transfer(self, jobname, to_server, **context):
+        """
+        Copy a job to another server.
+        """
+        config = self.get_config_xml(jobname)
+        config = config.replace('<disabled>false</disabled>',
+                                '<disabled>true</disabled>')
+
+        return requests.post(self._other_url(to_server, NEWJOB),
+                             data=config,
+                             params={'name': jobname},
+                             headers={'Content-Type': 'application/xml'},
+                             auth=self.auth)
+
 
     def copy(self, jobname, copy_from='template'):
         """
