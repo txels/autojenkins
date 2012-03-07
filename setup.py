@@ -6,13 +6,10 @@ from setuptools import setup
 from autojenkins import __version__
 
 
-long_description = open('README.rst').read()
-
-
 setup(
     name='autojenkins',
     description='Jenkins Remote Control Library',
-    long_description=long_description,
+    long_description=open('README.rst').read(),
     version=__version__,
     author='Carles Barrobés',
     author_email='carles@barrobes.com',
