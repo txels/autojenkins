@@ -52,7 +52,7 @@ copyright = u'2011, Carles Barrobés'
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 
-from autojenkins import __version__
+from ajk_version import __version__
 # The short X.Y version.
 version = re.match('([0-9]+\.[0-9]+).*', __version__).group(1)
 # The full version, including alpha/beta/rc tags.

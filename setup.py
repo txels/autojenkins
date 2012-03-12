@@ -3,7 +3,7 @@
 
 from setuptools import setup
 
-from autojenkins import __version__
+from ajk_version import __version__
 
 
 setup(

@@ -1,1 +1,2 @@
 include README.rst
+include ajk_version.py
