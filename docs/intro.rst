@@ -57,6 +57,7 @@ Available commands:
 
 * ``ajk-list`` - list all jobs in a server
 * ``ajk-create`` - create a job
+* ``ajk-build`` - start building a job
 * ``ajk-delete`` - delete a job
 
 ``ajk-list``
