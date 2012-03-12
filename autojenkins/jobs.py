@@ -4,6 +4,7 @@ from jinja2 import Template
 
 API = '/api/python'
 NEWJOB = '{0}/createItem'
+JOB_URL = '{0}/job/{1}'
 DELETE = '{0}/job/{1}/doDelete'
 BUILD = '{0}/job/{1}/build'
 CONFIG = '{0}/job/{1}/config.xml'
@@ -54,6 +55,12 @@ class Jenkins(object):
         response = self._get(LIST)
         jobs = eval(response.content).get('jobs', [])
         return [(job['name'], job['color']) for job in jobs]
+
+    def job_url(self, jobname):
+        """
+        Get the human-browseable URL for a job.
+        """
+        return self._build_url(JOB_URL, jobname)
 
     def job_info(self, jobname):
         """

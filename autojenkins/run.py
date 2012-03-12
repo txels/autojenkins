@@ -47,6 +47,7 @@ def create_job(host, jobname, options):
     if response.status_code == 200 and options.build:
         print('Triggering build.')
         jenkins.build(jobname)
+    print ('Job URL: {0}'.format(jenkins.job_url(jobname)))
     return response.status_code
 
 
