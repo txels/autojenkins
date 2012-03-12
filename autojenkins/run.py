@@ -50,6 +50,17 @@ def create_job(host, jobname, options):
     return response.status_code
 
 
+def build_job(host, jobname):
+    """
+    Trigger build for an existing job
+    """
+    print ("Start building job '{0}'".format(jobname))
+
+    jenkins = Jenkins(host)
+    response = jenkins.build(jobname)
+    return response.status_code
+
+
 def delete_job(host, jobname):
     """
     Delete an existing job
@@ -58,7 +69,7 @@ def delete_job(host, jobname):
 
     jenkins = Jenkins(host)
     response = jenkins.delete(jobname)
-    print('Status: {0}'.format(response.status_code))
+    return response.status_code
 
 
 def list_jobs(host, color=True):
@@ -104,6 +115,18 @@ class Commands:
         if len(args) == 2:
             host, jobname = args
             create_job(host, jobname, options)
+        else:
+            parser.print_help()
+
+    @staticmethod
+    def build():
+        parser = create_opts_parser('build a job')
+
+        (options, args) = parser.parse_args()
+
+        if len(args) == 2:
+            host, jobname = args
+            build_job(host, jobname)
         else:
             parser.print_help()
 
