@@ -14,5 +14,3 @@ nosetests --with-xunit --cover-erase --with-xcoverage --cover-inclusive --cover-
 
 # PEP8
 pep8 --ignore=W293 -r ${PROJECT} > pep8.txt || echo "PEP-8 violations."
-
-
