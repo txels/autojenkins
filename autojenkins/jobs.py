@@ -105,6 +105,15 @@ class Jenkins(object):
         response = self._get(CONFIG, jobname)
         return response.content
 
+    def set_config_xml(self, jobname, config):
+        """
+        Update the ``config.xml`` of a existing job.
+        """
+        return requests.post(self._build_url(CONFIG, jobname),
+                             data=config,
+                             headers={'Content-Type': 'application/xml'},
+                             auth=self.auth)
+
     def create(self, jobname, config_file, **context):
         """
         Create a job from a configuration file.
