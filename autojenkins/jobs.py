@@ -27,7 +27,7 @@ def _validate(response):
     Verify the status code of the response and raise exception on 404
     """
     if response.status_code == 404:
-        raise HttpNotFoundError(response.message)
+        raise HttpNotFoundError()
     return response
 
 
