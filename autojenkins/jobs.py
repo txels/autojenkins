@@ -18,16 +18,29 @@ ENABLE = '{0}/job/{1}/enable'
 DISABLE = '{0}/job/{1}/disable'
 
 
-class HttpNotFoundError(Exception):
+class HttpStatusError(Exception):
     pass
+
+
+class HttpNotFoundError(HttpStatusError):
+    pass
+
+
+HTTP_ERROR_MAP = {
+    404: HttpNotFoundError,
+}
 
 
 def _validate(response):
     """
     Verify the status code of the response and raise exception on 404
     """
-    if response.status_code == 404:
-        raise HttpNotFoundError()
+    message = 'HTTP Status: {0}'.format(response.status_code)
+    if response.status_code >= 400:
+        print(message)
+        exception_cls = HTTP_ERROR_MAP.get(response.status_code,
+                                           HttpStatusError)
+        raise exception_cls(message)
     return response
 
 
