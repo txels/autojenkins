@@ -3,7 +3,6 @@ from unittest import TestCase
 
 from ddt import ddt, data
 from mock import Mock, patch
-from nose.tools import assert_equal
 
 from autojenkins.jobs import Jenkins
 
@@ -100,6 +99,8 @@ class TestJenkins(TestCase):
              (('artifacts', 0, 'displayPath'),
                         'apache-solr-4.0-2012-02-29_09-07-30-src.tgz'),
             ])
+
+    # TODO: test job creation
 
     @data(
         ('build', 'job/{0}/build'),
