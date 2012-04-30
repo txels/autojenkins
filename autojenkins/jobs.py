@@ -18,6 +18,19 @@ ENABLE = '{0}/job/{1}/enable'
 DISABLE = '{0}/job/{1}/disable'
 
 
+class HttpNotFoundError(Exception):
+    pass
+
+
+def _validate(response):
+    """
+    Verify the status code of the response and raise exception on 404
+    """
+    if response.status_code == 404:
+        raise HttpNotFoundError(response.message)
+    return response
+
+
 class Jenkins(object):
     """Main class to interact with a Jenkins server."""
 
@@ -38,12 +51,14 @@ class Jenkins(object):
         return command.format(root, *args)
 
     def _get(self, url_pattern, *args):
-        return requests.get(self._build_url(url_pattern, *args),
-                            auth=self.auth)
+        response = requests.get(self._build_url(url_pattern, *args),
+                                auth=self.auth)
+        return _validate(response)
 
     def _post(self, url_pattern, *args):
-        return requests.post(self._build_url(url_pattern, *args),
-                            auth=self.auth)
+        response = requests.post(self._build_url(url_pattern, *args),
+                                 auth=self.auth)
+        return _validate(response)
 
     def all_jobs(self):
         """
