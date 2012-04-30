@@ -122,7 +122,7 @@ class Jenkins(object):
 
     def set_config_xml(self, jobname, config):
         """
-        Update the ``config.xml`` of a existing job.
+        Replace the ``config.xml`` of an existing job.
         """
         return requests.post(self._build_url(CONFIG, jobname),
                              data=config,

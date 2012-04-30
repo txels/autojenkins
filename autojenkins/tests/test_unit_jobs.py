@@ -50,6 +50,7 @@ class TestJenkins(TestCase):
         ('last_build_info', 'job/{0}/lastBuild/api/python'),
         ('last_build_report', 'job/{0}/lastBuild/testReport/api/python'),
         ('last_success', 'job/{0}/lastSuccessfulBuild/api/python'),
+        ('get_config_xml', 'job/{0}/config.xml'),
     )
     def test_get_methods_with_jobname(self, case, requests, Template):
         method, url = case
@@ -100,7 +101,11 @@ class TestJenkins(TestCase):
                         'apache-solr-4.0-2012-02-29_09-07-30-src.tgz'),
             ])
 
-    # TODO: test job creation
+    def checks_get_config_xml(self, response):
+        self.assertTrue(response.startswith('<?xml'))
+        self.assertTrue(response.endswith('</project>'))
+
+    # TODO: test job creation, and set_config_xml
 
     @data(
         ('build', 'job/{0}/build'),
