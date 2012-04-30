@@ -45,6 +45,10 @@ class TestJenkins(TestCase):
                                              auth=None)
         self.assertEqual(jobs, [('job1', 'blue')])
 
+    def test_get_job_url(self, *args):
+        url = self.jenkins.job_url('job123')
+        self.assertEqual('http://jenkins/job/job123', url)
+
     @data(
         ('job_info', 'job/{0}/api/python'),
         ('last_build_info', 'job/{0}/lastBuild/api/python'),
