@@ -4,7 +4,7 @@ from unittest import TestCase
 from ddt import ddt, data
 from mock import Mock, patch
 
-from autojenkins.jobs import Jenkins
+from autojenkins.jobs import Jenkins, HttpNotFoundError
 
 
 fixture_path = path.dirname(__file__)
@@ -117,3 +117,10 @@ class TestJenkins(TestCase):
             'http://jenkins/' + url.format('name'),
             auth=None)
         self.assertEqual(302, response.status_code)
+
+    def test_404_raises_job_not_found(self, requests, Template):
+        http404_response = Mock()
+        http404_response.status_code = 404
+        requests.get.return_value = http404_response
+        with self.assertRaises(HttpNotFoundError):
+            self.jenkins.last_build_info('job123')
