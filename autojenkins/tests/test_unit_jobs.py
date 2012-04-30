@@ -49,6 +49,20 @@ class TestJenkins(TestCase):
         url = self.jenkins.job_url('job123')
         self.assertEqual('http://jenkins/job/job123', url)
 
+    def test_last_result(self, requests, *args):
+        second_response = Mock()
+        second_response.content = "{'result': 23}"
+        requests.get.side_effect = [
+            mock_response('job_info.txt'), second_response
+        ]
+        response = self.jenkins.last_result('name')
+        self.assertEqual(23, response['result'])
+        self.assertEqual(
+            (('https://builds.apache.org/job/Solr-Trunk/1783/api/python',),
+             {'auth': None}),
+            requests.get.call_args_list[1]
+        )
+
     @data(
         ('job_info', 'job/{0}/api/python'),
         ('last_build_info', 'job/{0}/lastBuild/api/python'),

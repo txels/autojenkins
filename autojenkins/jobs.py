@@ -2,18 +2,18 @@ import requests
 from jinja2 import Template
 
 
-API = '/api/python'
+API = 'api/python'
 NEWJOB = '{0}/createItem'
 JOB_URL = '{0}/job/{1}'
 DELETE = '{0}/job/{1}/doDelete'
 BUILD = '{0}/job/{1}/build'
 CONFIG = '{0}/job/{1}/config.xml'
-JOBINFO = '{0}/job/{1}' + API
-LIST = '{0}' + API
-LAST_SUCCESS = '{0}/job/{1}/lastSuccessfulBuild' + API
-TEST_REPORT = '{0}/job/{1}/lastSuccessfulBuild/testReport' + API
-LAST_BUILD = '{0}/job/{1}/lastBuild' + API
-LAST_REPORT = '{0}/job/{1}/lastBuild/testReport' + API
+JOBINFO = '{0}/job/{1}/' + API
+LIST = '{0}/' + API
+LAST_SUCCESS = '{0}/job/{1}/lastSuccessfulBuild/' + API
+TEST_REPORT = '{0}/job/{1}/lastSuccessfulBuild/testReport/' + API
+LAST_BUILD = '{0}/job/{1}/lastBuild/' + API
+LAST_REPORT = '{0}/job/{1}/lastBuild/testReport/' + API
 ENABLE = '{0}/job/{1}/enable'
 DISABLE = '{0}/job/{1}/disable'
 

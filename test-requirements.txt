@@ -1,6 +1,6 @@
 coverage==3.4
 ddt
-mock
+mock>=0.8
 nose
 nosexcover
 pep8
