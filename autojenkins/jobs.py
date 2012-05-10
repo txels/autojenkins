@@ -1,3 +1,5 @@
+import sys
+import time
 import requests
 from jinja2 import Template
 
@@ -200,11 +202,20 @@ class Jenkins(object):
         return requests.post(self._build_url(NEWJOB), params=params,
                              auth=self.auth)
 
-    def build(self, jobname):
+    def build(self, jobname, wait=False, grace=10):
         """
         Trigger Jenkins to build a job.
+
+        :param wait:
+            If ``True``, wait until job completes building before returning
         """
-        return self._post(BUILD, jobname)
+        response = self._post(BUILD, jobname)
+        if not wait:
+            return response
+        else:
+            time.sleep(grace)
+            self.wait_for_build(jobname)
+            return self.last_result(jobname)
 
     def delete(self, jobname):
         """
@@ -223,3 +234,19 @@ class Jenkins(object):
         Trigger Jenkins to disable a job.
         """
         return self._post(DISABLE, jobname)
+
+    def is_building(self, jobname):
+        """
+        Check if a job is building
+        """
+        return self.last_result(jobname).get('building', True)
+
+    def wait_for_build(self, jobname, poll_interval=3):
+        """
+        Wait until job has finished building
+        """
+        while (self.is_building(jobname)):
+            time.sleep(poll_interval)
+            sys.stdout.write('.')
+            sys.stdout.flush()
+        print('')
