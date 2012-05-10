@@ -6,7 +6,7 @@ PROJECT="autojenkins"
 find ./${PROJECT} -name "*.pyc" -exec rm {} \;
 
 # Run tests with coverage
-nosetests --with-xunit --cover-erase --with-xcoverage --cover-inclusive --cover-html --cover-package=${PROJECT}
+nosetests --with-xunit --cover-erase --with-xcoverage --cover-inclusive --cover-html --cover-package=${PROJECT} $PROJECT
 
 
 # Build documentation
