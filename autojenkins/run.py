@@ -1,4 +1,5 @@
 import optparse
+import sys
 
 from autojenkins import Jenkins
 
@@ -51,15 +52,29 @@ def create_job(host, jobname, options):
     return response.status_code
 
 
-def build_job(host, jobname):
+def build_job(host, jobname, options):
     """
-    Trigger build for an existing job
+    Trigger build for an existing job.
+
+    If the wait option is specified, wait until build completion
+
+    :returns:
+
+        A boolean value indicating success:
+
+         * If wait: ``True`` if build was successful, ``False`` otherwise
+         * If not wait: ``True`` if HTTP status code is not an error code
     """
     print ("Start building job '{0}'".format(jobname))
 
     jenkins = Jenkins(host)
-    response = jenkins.build(jobname)
-    return response.status_code
+    response = jenkins.build(jobname, wait=options.wait)
+    if options.wait:
+        result = response['result']
+        print('Result = "{0}"'.format(result))
+        return result == 'SUCCESS'
+    else:
+        return response.status_code < 400
 
 
 def delete_job(host, jobname):
@@ -122,12 +137,17 @@ class Commands:
     @staticmethod
     def build():
         parser = create_opts_parser('build a job')
+        parser.add_option('-w', '--wait',
+                          action="store_true", dest="wait", default=False,
+                          help='wait until the build completes')
 
         (options, args) = parser.parse_args()
 
         if len(args) == 2:
             host, jobname = args
-            build_job(host, jobname)
+            success = build_job(host, jobname, options)
+            if not success:
+                sys.exit(1)
         else:
             parser.print_help()
 
