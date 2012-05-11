@@ -20,7 +20,7 @@ AutoJenkins as API
 
 Sample use:
 
-.. code-block:: python 
+.. code-block:: python
 
     from autojenkins import Jenkins
 
@@ -103,15 +103,15 @@ Usage help:
 
     $ ajk-create -h
 
-    Usage: ajk-create host jobname [options]
+    Usage: ajk-create host [jobname] [options]
 
     Run autojenkins to create a job.
 
     Options:
       -h, --help            show this help message and exit
+      -D VAR=VALUE          substitution variables to be used in the template
       -t TEMPLATE, --template=TEMPLATE
                             the template job to copy from
-      -D PROP=VALUE         substitution variables for the template
       -b, --build           start a build right after creation
 
 Sample command:
@@ -129,12 +129,38 @@ Usage help:
 
 .. code-block:: none
 
+    $ ajk-delete -h
+
     Usage: ajk-delete host [jobname] [options]
 
     Run autojenkins to delete a job.
 
     Options:
       -h, --help  show this help message and exit
+
+``ajk-build``
+~~~~~~~~~~~~~
+
+Trigger the building of a job, optionally waiting for it to complete.
+
+When used with the ``--wait`` flag, it will exit with a status different than
+0 if the build is not successful. This makes it useful when including this in
+shell scripts that depend on a successful build to take further action.
+
+Usage help:
+
+.. code-block:: none
+
+    $ ajk-build -h
+
+    Usage: ajk-build host [jobname] [options]
+
+    Run autojenkins to build a job.
+
+    Options:
+      -h, --help  show this help message and exit
+      -w, --wait  wait until the build completes
+
 
 More Info
 ---------
