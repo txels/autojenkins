@@ -120,24 +120,6 @@ Sample command:
 
     $ ajk-create http://my.server my-job -t template -Dbranch=my-branch
 
-``ajk-delete``
-~~~~~~~~~~~~~~
-
-Delete a job from a Jenkins server.
-
-Usage help:
-
-.. code-block:: none
-
-    $ ajk-delete -h
-
-    Usage: ajk-delete host [jobname] [options]
-
-    Run autojenkins to delete a job.
-
-    Options:
-      -h, --help  show this help message and exit
-
 ``ajk-build``
 ~~~~~~~~~~~~~
 
@@ -160,6 +142,24 @@ Usage help:
     Options:
       -h, --help  show this help message and exit
       -w, --wait  wait until the build completes
+
+``ajk-delete``
+~~~~~~~~~~~~~~
+
+Delete a job from a Jenkins server.
+
+Usage help:
+
+.. code-block:: none
+
+    $ ajk-delete -h
+
+    Usage: ajk-delete host [jobname] [options]
+
+    Run autojenkins to delete a job.
+
+    Options:
+      -h, --help  show this help message and exit
 
 
 More Info
