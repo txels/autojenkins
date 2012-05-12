@@ -144,7 +144,7 @@ class TestJenkins(TestCase):
     @patch('autojenkins.jobs.time')
     @patch('autojenkins.jobs.Jenkins.last_result')
     @patch('autojenkins.jobs.Jenkins.wait_for_build')
-    def test_build_wait(self, wait_for_build, last_result, time, requests,
+    def test_build_with_wait(self, wait_for_build, last_result, time, requests,
             Template):
         """Test building a job synchronously"""
         requests.post.return_value = mock_response(status=302)
@@ -156,6 +156,16 @@ class TestJenkins(TestCase):
             auth=None)
         last_result.assert_called_once_with('name')
         time.sleep.assert_called_once_with(10)
+
+    @patch('autojenkins.jobs.time')
+    @patch('autojenkins.jobs.sys')
+    @patch('autojenkins.jobs.Jenkins.is_building')
+    def test_wait_for_build(self, is_building, sys, time, requests, Template):
+        is_building.side_effect = [True, True, False]
+        self.jenkins.wait_for_build('name')
+        self.assertEqual(3, is_building.call_count)
+        self.assertEqual(2, time.sleep.call_count)
+        self.assertEqual(((3,), {}), time.sleep.call_args)
 
     def test_404_raises_http_not_found(self, requests, Template):
         http404_response = Mock()
