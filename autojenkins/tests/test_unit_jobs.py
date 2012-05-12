@@ -136,10 +136,26 @@ class TestJenkins(TestCase):
         # Jenkins API post methods return status 302 upon success
         requests.post.return_value = mock_response(status=302)
         response = getattr(self.jenkins, method)('name')
+        self.assertEqual(302, response.status_code)
         requests.post.assert_called_once_with(
             'http://jenkins/' + url.format('name'),
             auth=None)
-        self.assertEqual(302, response.status_code)
+
+    @patch('autojenkins.jobs.time')
+    @patch('autojenkins.jobs.Jenkins.last_result')
+    @patch('autojenkins.jobs.Jenkins.wait_for_build')
+    def test_build_wait(self, wait_for_build, last_result, time, requests,
+            Template):
+        """Test building a job synchronously"""
+        requests.post.return_value = mock_response(status=302)
+        last_result.return_value = {'result': 'HELLO'}
+        result = self.jenkins.build('name', wait=True)
+        self.assertEqual({'result': 'HELLO'}, result)
+        requests.post.assert_called_once_with(
+            'http://jenkins/job/name/build',
+            auth=None)
+        last_result.assert_called_once_with('name')
+        time.sleep.assert_called_once_with(10)
 
     def test_404_raises_http_not_found(self, requests, Template):
         http404_response = Mock()
