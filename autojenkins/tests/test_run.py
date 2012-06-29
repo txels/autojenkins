@@ -13,6 +13,3 @@ def test_delete_jobs(jenkins):
     assert_equals(
             [(('hello',), {}), (('bye',), {})],
             jenkins.return_value.delete.call_args_list)
-
-
-
