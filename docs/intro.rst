@@ -90,6 +90,8 @@ jobs depending on status.
     Options:
       -h, --help      show this help message and exit
       -n, --no-color  do not use colored output
+      -r, --raw       only output job names, so that output is more usable for
+                      piping to other processes
 
 ``ajk-create``
 ~~~~~~~~~~~~~~
@@ -154,9 +156,9 @@ Usage help:
 
     $ ajk-delete -h
 
-    Usage: ajk-delete host [jobname] [options]
+    Usage: ajk-delete host [jobname]+ [options]
 
-    Run autojenkins to delete a job.
+    Run autojenkins to delete one or more jobs.
 
     Options:
       -h, --help  show this help message and exit

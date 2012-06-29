@@ -77,28 +77,32 @@ def build_job(host, jobname, options):
         return response.status_code < 400
 
 
-def delete_job(host, jobname):
+def delete_jobs(host, jobnames):
     """
-    Delete an existing job
+    Delete existing jobs.
     """
-    print ("Deleting job '{0}'".format(jobname))
+    for jobname in jobnames:
+        print ("Deleting job '{0}'".format(jobname))
+        jenkins = Jenkins(host)
+        response = jenkins.delete(jobname)
+        print(response.status_code)
 
-    jenkins = Jenkins(host)
-    response = jenkins.delete(jobname)
-    return response.status_code
 
-
-def list_jobs(host, color=True):
+def list_jobs(host, color=True, raw=False):
     """
     List all jobs
     """
-    if color:
+    if raw:
+        FORMAT = "{1}"
+        position = 0
+    elif color:
         FORMAT = "\033[{0}m{1}\033[0m"
         position = 0
     else:
         FORMAT = "{0:<10} {1}"
         position = 1
-    print ("All jobs in {0}".format(host))
+    if not raw:
+        print ("All jobs in {0}".format(host))
     jenkins = Jenkins(host)
     jobs = jenkins.all_jobs()
     for name, color in jobs:
@@ -107,7 +111,7 @@ def list_jobs(host, color=True):
             building = True
         else:
             building = False
-        prefix = '* ' if building else '  '
+        prefix = '' if raw else '* ' if building else '  '
         out = COLOR_MEANING[color][position]
         print(prefix + FORMAT.format(out, name))
 
@@ -153,13 +157,15 @@ class Commands:
 
     @staticmethod
     def delete():
-        parser = create_opts_parser('delete a job')
+        parser = create_opts_parser(
+                    'delete one or more jobs',
+                    params="[jobname]+ [options]")
 
         (options, args) = parser.parse_args()
 
-        if len(args) == 2:
-            host, jobname = args
-            delete_job(host, jobname)
+        if len(args) >= 2:
+            host, jobnames = args[0], args[1:]
+            delete_jobs(host, jobnames)
         else:
             parser.print_help()
 
@@ -169,11 +175,14 @@ class Commands:
         parser.add_option('-n', '--no-color',
                           action="store_true", dest="color", default=False,
                           help='do not use colored output')
+        parser.add_option('-r', '--raw',
+                          action="store_true", dest="raw", default=False,
+                          help='print raw list of jobs')
 
         (options, args) = parser.parse_args()
 
         if len(args) == 1:
             host, = args
-            list_jobs(host, not options.color)
+            list_jobs(host, not options.color, options.raw)
         else:
             parser.print_help()
