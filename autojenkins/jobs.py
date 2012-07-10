@@ -11,6 +11,7 @@ DELETE = '{0}/job/{1}/doDelete'
 BUILD = '{0}/job/{1}/build'
 CONFIG = '{0}/job/{1}/config.xml'
 JOBINFO = '{0}/job/{1}/' + API
+BUILDINFO = '{0}/job/{1}/{2}/' + API
 LIST = '{0}/' + API
 LAST_SUCCESS = '{0}/job/{1}/lastSuccessfulBuild/' + API
 TEST_REPORT = '{0}/job/{1}/lastSuccessfulBuild/testReport/' + API
@@ -99,12 +100,24 @@ class Jenkins(object):
         response = self._get(JOBINFO, jobname)
         return eval(response.content)
 
+    def build_info(self, jobname, build_number=None):
+        """
+        Get information for a build of a job.
+
+        If no build number is specified, defaults to the most recent build.
+        """
+        if build_number is not None:
+            args = (BUILDINFO, jobname, build_number)
+        else:
+            args = (LAST_BUILD, jobname)
+        response = self._get(*args)
+        return eval(response.content)
+
     def last_build_info(self, jobname):
         """
         Get information for last build of a job.
         """
-        response = self._get(LAST_BUILD, jobname)
-        return eval(response.content)
+        return self.build_info(jobname)
 
     def last_build_report(self, jobname):
         """
