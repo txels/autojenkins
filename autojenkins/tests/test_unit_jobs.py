@@ -79,6 +79,14 @@ class TestJenkins(TestCase):
             auth=None)
         getattr(self, 'checks_{0}'.format(method))(response)
 
+    def test_build_info(self, requests, Template):
+        url = 'job/name/3/api/python'
+        requests.get.return_value = mock_response('last_build_info.txt')
+        self.jenkins.build_info('name', 3)
+        requests.get.assert_called_once_with(
+            'http://jenkins/' + url,
+            auth=None)
+
     def check_result(self, response, route, value):
         for key in route:
             response = response[key]
