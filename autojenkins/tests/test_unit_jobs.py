@@ -144,6 +144,18 @@ class TestJenkins(TestCase):
             params={'name': 'job'},
             data=CFG)
 
+    def test_transfer(self, requests):
+        requests.get.return_value = mock_response('transfer.txt')
+        requests.post.return_value = mock_response()
+        self.jenkins.transfer('job', 'http://jenkins2')
+        CFG = load_fixture('transfer.txt')
+        requests.post.assert_called_once_with(
+            'http://jenkins2/createItem',
+            auth=None,
+            headers={'Content-Type': 'application/xml'},
+            params={'name': 'job'},
+            data=CFG)
+
     @data(
         ('build', 'job/{0}/build'),
         ('delete', 'job/{0}/doDelete'),
