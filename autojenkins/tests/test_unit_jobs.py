@@ -29,7 +29,6 @@ def mock_response(fixture=None, status=200):
 
 
 @ddt
-@patch('autojenkins.jobs.Template')
 @patch('autojenkins.jobs.requests')
 class TestJenkins(TestCase):
 
@@ -37,7 +36,7 @@ class TestJenkins(TestCase):
         super(TestJenkins, self).setUp()
         self.jenkins = Jenkins('http://jenkins')
 
-    def test_all_jobs(self, requests, Template):
+    def test_all_jobs(self, requests):
         response = {'jobs': [{'name': 'job1', 'color': 'blue'}]}
         requests.get.return_value = mock_response(response)
         jobs = self.jenkins.all_jobs()
@@ -70,7 +69,7 @@ class TestJenkins(TestCase):
         ('last_success', 'job/{0}/lastSuccessfulBuild/api/python'),
         ('get_config_xml', 'job/{0}/config.xml'),
     )
-    def test_get_methods_with_jobname(self, case, requests, Template):
+    def test_get_methods_with_jobname(self, case, requests):
         method, url = case
         requests.get.return_value = mock_response('{0}.txt'.format(method))
         response = getattr(self.jenkins, method)('name')
@@ -79,7 +78,7 @@ class TestJenkins(TestCase):
             auth=None)
         getattr(self, 'checks_{0}'.format(method))(response)
 
-    def test_build_info(self, requests, Template):
+    def test_build_info(self, requests):
         url = 'job/name/3/api/python'
         requests.get.return_value = mock_response('last_build_info.txt')
         self.jenkins.build_info('name', 3)
@@ -133,13 +132,25 @@ class TestJenkins(TestCase):
 
     # TODO: test job creation, and set_config_xml
 
+    def test_create_copy(self, requests):
+        requests.get.return_value = mock_response('create_copy.txt')
+        requests.post.return_value = mock_response()
+        self.jenkins.create_copy('job', 'template', value='2')
+        CFG = "<value>2</value><disabled>false</disabled>"
+        requests.post.assert_called_once_with(
+            'http://jenkins/createItem',
+            auth=None,
+            headers={'Content-Type': 'application/xml'},
+            params={'name': 'job'},
+            data=CFG)
+
     @data(
         ('build', 'job/{0}/build'),
         ('delete', 'job/{0}/doDelete'),
         ('enable', 'job/{0}/enable'),
         ('disable', 'job/{0}/disable'),
     )
-    def test_post_methods_with_jobname(self, case, requests, Template):
+    def test_post_methods_with_jobname(self, case, requests):
         method, url = case
         # Jenkins API post methods return status 302 upon success
         requests.post.return_value = mock_response(status=302)
@@ -152,8 +163,8 @@ class TestJenkins(TestCase):
     @patch('autojenkins.jobs.time')
     @patch('autojenkins.jobs.Jenkins.last_result')
     @patch('autojenkins.jobs.Jenkins.wait_for_build')
-    def test_build_with_wait(self, wait_for_build, last_result, time, requests,
-            Template):
+    def test_build_with_wait(self, wait_for_build, last_result, time,
+                             requests):
         """Test building a job synchronously"""
         requests.post.return_value = mock_response(status=302)
         last_result.return_value = {'result': 'HELLO'}
@@ -168,21 +179,21 @@ class TestJenkins(TestCase):
     @patch('autojenkins.jobs.time')
     @patch('autojenkins.jobs.sys')
     @patch('autojenkins.jobs.Jenkins.is_building')
-    def test_wait_for_build(self, is_building, sys, time, requests, Template):
+    def test_wait_for_build(self, is_building, sys, time, requests):
         is_building.side_effect = [True, True, False]
         self.jenkins.wait_for_build('name')
         self.assertEqual(3, is_building.call_count)
         self.assertEqual(2, time.sleep.call_count)
         self.assertEqual(((3,), {}), time.sleep.call_args)
 
-    def test_404_raises_http_not_found(self, requests, Template):
+    def test_404_raises_http_not_found(self, requests):
         http404_response = Mock()
         http404_response.status_code = 404
         requests.get.return_value = http404_response
         with self.assertRaises(HttpNotFoundError):
             self.jenkins.last_build_info('job123')
 
-    def test_500_raises_http_error(self, requests, Template):
+    def test_500_raises_http_error(self, requests):
         http500_response = Mock()
         http500_response.status_code = 500
         requests.get.return_value = http500_response
