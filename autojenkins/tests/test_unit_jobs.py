@@ -222,6 +222,14 @@ class TestJenkins(TestCase):
         self.assertEqual(2, time.sleep.call_count)
         self.assertEqual(((3,), {}), time.sleep.call_args)
 
+    @patch('autojenkins.jobs.Jenkins.last_result')
+    @data(True, False)
+    def test_is_building(self, building, last_result, _):
+        last_result.return_value = {'building': building}
+        result = self.jenkins.is_building('name')
+        last_result.assert_called_once_with('name')
+        self.assertEqual(building, result)
+
     def test_404_raises_http_not_found(self, requests):
         http404_response = Mock()
         http404_response.status_code = 404
