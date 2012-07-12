@@ -174,7 +174,7 @@ class TestJenkins(TestCase):
         ('enable', 'job/{0}/enable'),
         ('disable', 'job/{0}/disable'),
     )
-    def test_post_methods_with_jobname(self, case, requests):
+    def test_post_methods_with_jobname_no_data(self, case, requests):
         method, url = case
         # Jenkins API post methods return status 302 upon success
         requests.post.return_value = mock_response(status=302)
@@ -182,6 +182,18 @@ class TestJenkins(TestCase):
         self.assertEqual(302, response.status_code)
         requests.post.assert_called_once_with(
             'http://jenkins/' + url.format('name'),
+            auth=None)
+
+    def test_set_config_xml(self, requests):
+        requests.post.return_value = Mock()
+        CFG = '<config>x</config>'
+        response = self.jenkins.set_config_xml('name', CFG)
+        # return value is a pass-trough
+        self.assertEqual(requests.post.return_value, response)
+        requests.post.assert_called_once_with(
+            'http://jenkins/job/name/config.xml',
+            headers={'Content-Type': 'application/xml'},
+            data=CFG,
             auth=None)
 
     @patch('autojenkins.jobs.time')
