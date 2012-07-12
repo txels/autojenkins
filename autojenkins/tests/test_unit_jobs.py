@@ -132,6 +132,18 @@ class TestJenkins(TestCase):
 
     # TODO: test job creation, and set_config_xml
 
+    def test_create(self, requests):
+        requests.post.return_value = mock_response()
+        config_xml = path.join(fixture_path, 'create_copy.txt')
+        self.jenkins.create('job', config_xml, value='2')
+        CFG = "<value>2</value><disabled>true</disabled>"
+        requests.post.assert_called_once_with(
+            'http://jenkins/createItem',
+            auth=None,
+            headers={'Content-Type': 'application/xml'},
+            params={'name': 'job'},
+            data=CFG)
+
     def test_create_copy(self, requests):
         requests.get.return_value = mock_response('create_copy.txt')
         requests.post.return_value = mock_response()
