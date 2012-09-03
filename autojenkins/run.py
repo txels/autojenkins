@@ -4,7 +4,8 @@ import sys
 from autojenkins import Jenkins
 
 COLOR_MEANING = {
-    'blue': ('1;34', 'SUCCESS'),
+    'blue': ('1;32', 'SUCCESS'),
+    'green': ('1;32', 'SUCCESS'),
     'red': ('1;31', 'FAILED'),
     'yellow': ('1;33', 'UNSTABLE'),
     'aborted': ('1;37', 'ABORTED'),
