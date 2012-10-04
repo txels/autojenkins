@@ -21,6 +21,10 @@ def create_opts_parser(command, params="[jobname] [options]"):
     usage = "Usage: %prog host " + params
     desc = 'Run autojenkins to {0}.'.format(command)
     parser = optparse.OptionParser(description=desc, usage=usage)
+    parser.add_option('-u', '--user',
+                        help='username')
+    parser.add_option('-p', '--password',
+                        help='password or token')
     return parser
 
 
@@ -31,6 +35,16 @@ def get_variables(options):
     split_eq = lambda x: x.split('=')
     data = dict(map(split_eq, options.D))
     return data
+
+
+def get_auth(options):
+    """
+    Return a tuple of (user, password) or None if no authentication
+    """
+    if options.user:
+        return (options.user, getattr(options, 'password', None))
+    else:
+        return None
 
 
 def create_job(host, jobname, options):
@@ -44,7 +58,7 @@ def create_job(host, jobname, options):
       {2}
     """.format(jobname, options.template, data))
 
-    jenkins = Jenkins(host)
+    jenkins = Jenkins(host, auth=get_auth(options))
     response = jenkins.create_copy(jobname, options.template, **data)
     if response.status_code == 200 and options.build:
         print('Triggering build.')
@@ -68,7 +82,7 @@ def build_job(host, jobname, options):
     """
     print ("Start building job '{0}'".format(jobname))
 
-    jenkins = Jenkins(host)
+    jenkins = Jenkins(host, auth=get_auth(options))
     response = jenkins.build(jobname, wait=options.wait)
     if options.wait:
         result = response['result']
@@ -78,18 +92,18 @@ def build_job(host, jobname, options):
         return response.status_code < 400
 
 
-def delete_jobs(host, jobnames):
+def delete_jobs(host, jobnames, options):
     """
     Delete existing jobs.
     """
+    jenkins = Jenkins(host, auth=get_auth(options))
     for jobname in jobnames:
         print ("Deleting job '{0}'".format(jobname))
-        jenkins = Jenkins(host)
         response = jenkins.delete(jobname)
         print(response.status_code)
 
 
-def list_jobs(host, color=True, raw=False):
+def list_jobs(host, options, color=True, raw=False):
     """
     List all jobs
     """
@@ -104,7 +118,7 @@ def list_jobs(host, color=True, raw=False):
         position = 1
     if not raw:
         print ("All jobs in {0}".format(host))
-    jenkins = Jenkins(host)
+    jenkins = Jenkins(host, auth=get_auth(options))
     jobs = jenkins.all_jobs()
     for name, color in jobs:
         if '_' in color:
@@ -166,7 +180,7 @@ class Commands:
 
         if len(args) >= 2:
             host, jobnames = args[0], args[1:]
-            delete_jobs(host, jobnames)
+            delete_jobs(host, jobnames, options)
         else:
             parser.print_help()
 
@@ -184,6 +198,6 @@ class Commands:
 
         if len(args) == 1:
             host, = args
-            list_jobs(host, not options.color, options.raw)
+            list_jobs(host, options, not options.color, options.raw)
         else:
             parser.print_help()
