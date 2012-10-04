@@ -41,7 +41,7 @@ def get_auth(options):
     """
     Return a tuple of (user, password) or None if no authentication
     """
-    if options.user:
+    if hasattr(options, 'user'):
         return (options.user, getattr(options, 'password', None))
     else:
         return None
