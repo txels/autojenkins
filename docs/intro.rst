@@ -89,6 +89,10 @@ jobs depending on status.
 
     Options:
       -h, --help      show this help message and exit
+      -u USER, --user=USER
+                      username
+      -p PASSWORD, --password=PASSWORD
+                      password or token
       -n, --no-color  do not use colored output
       -r, --raw       only output job names, so that output is more usable for
                       piping to other processes
@@ -111,6 +115,9 @@ Usage help:
 
     Options:
       -h, --help            show this help message and exit
+      -u USER, --user=USER  username
+      -p PASSWORD, --password=PASSWORD
+                            password or token
       -D VAR=VALUE          substitution variables to be used in the template
       -t TEMPLATE, --template=TEMPLATE
                             the template job to copy from
@@ -142,8 +149,11 @@ Usage help:
     Run autojenkins to build a job.
 
     Options:
-      -h, --help  show this help message and exit
-      -w, --wait  wait until the build completes
+      -h, --help             show this help message and exit
+      -u USER, --user=USER   username
+      -p PASSWORD, --password=PASSWORD
+                             password or token
+      -w, --wait             wait until the build completes
 
 ``ajk-delete``
 ~~~~~~~~~~~~~~
@@ -156,12 +166,15 @@ Usage help:
 
     $ ajk-delete -h
 
-    Usage: ajk-delete host [jobname]+ [options]
+    Usage: ajk-delete host [jobname]... [options]
 
     Run autojenkins to delete one or more jobs.
 
     Options:
-      -h, --help  show this help message and exit
+      -h, --help             show this help message and exit
+      -u USER, --user=USER   username
+      -p PASSWORD, --password=PASSWORD
+                             password or token
 
 
 More Info
