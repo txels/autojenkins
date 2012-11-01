@@ -41,6 +41,7 @@ class TestJenkins(TestCase):
         requests.get.return_value = mock_response(response)
         jobs = self.jenkins.all_jobs()
         requests.get.assert_called_once_with('http://jenkins/api/python',
+                                             verify=True,
                                              auth=None)
         self.assertEqual(jobs, [('job1', 'blue')])
 
@@ -75,6 +76,7 @@ class TestJenkins(TestCase):
         response = getattr(self.jenkins, method)('name')
         requests.get.assert_called_once_with(
             'http://jenkins/' + url.format('name'),
+            verify=True,
             auth=None)
         getattr(self, 'checks_{0}'.format(method))(response)
 
@@ -84,6 +86,7 @@ class TestJenkins(TestCase):
         self.jenkins.build_info('name', 3)
         requests.get.assert_called_once_with(
             'http://jenkins/' + url,
+            verify=True,
             auth=None)
 
     def check_result(self, response, route, value):
