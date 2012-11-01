@@ -66,9 +66,9 @@ class Jenkins(object):
         """
         return command.format(root, *args)
 
-    def _get(self, url_pattern, *args):
+    def _get(self, url_pattern, *args, **kwargs):
         response = requests.get(self._build_url(url_pattern, *args),
-                                auth=self.auth)
+                                auth=self.auth, verify=kwargs.pop('verify', True))
         return _validate(response)
 
     def _post(self, url_pattern, *args):
@@ -76,14 +76,14 @@ class Jenkins(object):
                                  auth=self.auth)
         return _validate(response)
 
-    def all_jobs(self):
+    def all_jobs(self,**kwargs):
         """
         Get a list of tuples with (name, color) of all jobs in the server.
 
         Color is ``blue``, ``yellow`` or ``red`` depending on build results
         (SUCCESS, UNSTABLE or FAILED).
         """
-        response = self._get(LIST)
+        response = self._get(LIST, **kwargs)
         jobs = eval(response.content).get('jobs', [])
         return [(job['name'], job['color']) for job in jobs]
 
