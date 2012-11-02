@@ -50,9 +50,10 @@ def _validate(response):
 class Jenkins(object):
     """Main class to interact with a Jenkins server."""
 
-    def __init__(self, base_url, auth=None):
+    def __init__(self, base_url, auth=None, verify_ssl_cert=True):
         self.ROOT = base_url
         self.auth = auth
+        self.verify_ssl_cert = verify_ssl_cert
 
     def _build_url(self, command, *args):
         """
@@ -68,12 +69,12 @@ class Jenkins(object):
 
     def _get(self, url_pattern, *args):
         response = requests.get(self._build_url(url_pattern, *args),
-                                auth=self.auth)
+                                auth=self.auth, verify=self.verify_ssl_cert)
         return _validate(response)
 
     def _post(self, url_pattern, *args):
         response = requests.post(self._build_url(url_pattern, *args),
-                                 auth=self.auth)
+                                 auth=self.auth, verify=self.verify_ssl_cert)
         return _validate(response)
 
     def all_jobs(self):
@@ -131,7 +132,7 @@ class Jenkins(object):
         Obtain results from last execution.
         """
         last_result_url = self.job_info(jobname)['lastBuild']['url']
-        response = requests.get(last_result_url + API, auth=self.auth)
+        response = requests.get(last_result_url + API, auth=self.auth, verify=self.verify_ssl_cert)
         return eval(response.content)
 
     def last_success(self, jobname):
@@ -155,7 +156,8 @@ class Jenkins(object):
         return requests.post(self._build_url(CONFIG, jobname),
                              data=config,
                              headers={'Content-Type': 'application/xml'},
-                             auth=self.auth)
+                             auth=self.auth,
+                             verify=self.verify_ssl_cert)
 
     def create(self, jobname, config_file, **context):
         """
@@ -172,7 +174,8 @@ class Jenkins(object):
                              data=content,
                              params=params,
                              headers={'Content-Type': 'application/xml'},
-                             auth=self.auth)
+                             auth=self.auth,
+                             verify=self.verify_ssl_cert)
 
     def create_copy(self, jobname, template_job, enable=True, **context):
         """
@@ -194,7 +197,8 @@ class Jenkins(object):
                              data=config,
                              params={'name': jobname},
                              headers={'Content-Type': 'application/xml'},
-                             auth=self.auth)
+                             auth=self.auth,
+                             verify=self.verify_ssl_cert)
 
     def transfer(self, jobname, to_server):
         """
@@ -205,7 +209,8 @@ class Jenkins(object):
                              data=config,
                              params={'name': jobname},
                              headers={'Content-Type': 'application/xml'},
-                             auth=self.auth)
+                             auth=self.auth,
+                             verify=self.verify_ssl_cert)
 
     def copy(self, jobname, copy_from='template'):
         """
@@ -213,7 +218,8 @@ class Jenkins(object):
         """
         params = {'name': jobname, 'mode': 'copy', 'from': copy_from}
         return requests.post(self._build_url(NEWJOB), params=params,
-                             auth=self.auth)
+                             auth=self.auth,
+                             verify=self.verify_ssl_cert)
 
     def build(self, jobname, wait=False, grace=10):
         """

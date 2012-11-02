@@ -41,6 +41,7 @@ class TestJenkins(TestCase):
         requests.get.return_value = mock_response(response)
         jobs = self.jenkins.all_jobs()
         requests.get.assert_called_once_with('http://jenkins/api/python',
+                                             verify=True,
                                              auth=None)
         self.assertEqual(jobs, [('job1', 'blue')])
 
@@ -58,7 +59,7 @@ class TestJenkins(TestCase):
         self.assertEqual(23, response['result'])
         self.assertEqual(
             (('https://builds.apache.org/job/Solr-Trunk/1783/api/python',),
-             {'auth': None}),
+             {'auth': None, 'verify': True}),
             requests.get.call_args_list[1]
         )
 
@@ -75,6 +76,7 @@ class TestJenkins(TestCase):
         response = getattr(self.jenkins, method)('name')
         requests.get.assert_called_once_with(
             'http://jenkins/' + url.format('name'),
+            verify=True,
             auth=None)
         getattr(self, 'checks_{0}'.format(method))(response)
 
@@ -84,6 +86,7 @@ class TestJenkins(TestCase):
         self.jenkins.build_info('name', 3)
         requests.get.assert_called_once_with(
             'http://jenkins/' + url,
+            verify=True,
             auth=None)
 
     def check_result(self, response, route, value):
@@ -142,7 +145,7 @@ class TestJenkins(TestCase):
             auth=None,
             headers={'Content-Type': 'application/xml'},
             params={'name': 'job'},
-            data=CFG)
+            data=CFG, verify=True)
 
     def test_create_copy(self, requests):
         requests.get.return_value = mock_response('create_copy.txt')
@@ -154,7 +157,7 @@ class TestJenkins(TestCase):
             auth=None,
             headers={'Content-Type': 'application/xml'},
             params={'name': 'job'},
-            data=CFG)
+            data=CFG, verify= True)
 
     def test_transfer(self, requests):
         requests.get.return_value = mock_response('transfer.txt')
@@ -166,7 +169,7 @@ class TestJenkins(TestCase):
             auth=None,
             headers={'Content-Type': 'application/xml'},
             params={'name': 'job'},
-            data=CFG)
+            data=CFG, verify=True)
 
     @data(
         ('build', 'job/{0}/build'),
@@ -182,7 +185,7 @@ class TestJenkins(TestCase):
         self.assertEqual(302, response.status_code)
         requests.post.assert_called_once_with(
             'http://jenkins/' + url.format('name'),
-            auth=None)
+            auth=None, verify=True)
 
     def test_set_config_xml(self, requests):
         requests.post.return_value = Mock()
@@ -194,7 +197,7 @@ class TestJenkins(TestCase):
             'http://jenkins/job/name/config.xml',
             headers={'Content-Type': 'application/xml'},
             data=CFG,
-            auth=None)
+            auth=None, verify=True)
 
     @patch('autojenkins.jobs.time')
     @patch('autojenkins.jobs.Jenkins.last_result')
@@ -208,7 +211,7 @@ class TestJenkins(TestCase):
         self.assertEqual({'result': 'HELLO'}, result)
         requests.post.assert_called_once_with(
             'http://jenkins/job/name/build',
-            auth=None)
+            auth=None, verify=True)
         last_result.assert_called_once_with('name')
         time.sleep.assert_called_once_with(10)
 
