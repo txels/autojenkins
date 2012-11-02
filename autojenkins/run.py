@@ -22,9 +22,9 @@ def create_opts_parser(command, params="[jobname] [options]"):
     desc = 'Run autojenkins to {0}.'.format(command)
     parser = optparse.OptionParser(description=desc, usage=usage)
     parser.add_option('-u', '--user',
-                        help='username')
+                      help='username')
     parser.add_option('-p', '--password',
-                        help='password or token')
+                      help='password or token')
     return parser
 
 
@@ -172,9 +172,8 @@ class Commands:
 
     @staticmethod
     def delete():
-        parser = create_opts_parser(
-                    'delete one or more jobs',
-                    params="[jobname]+ [options]")
+        parser = create_opts_parser('delete one or more jobs',
+                                    params="[jobname]+ [options]")
 
         (options, args) = parser.parse_args()
 

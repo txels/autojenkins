@@ -36,7 +36,7 @@ HTTP_ERROR_MAP = {
 
 def _validate(response):
     """
-    Verify the status code of the response and raise exception on 404
+    Verify the status code of the response and raise exception on codes > 400.
     """
     message = 'HTTP Status: {0}'.format(response.status_code)
     if response.status_code >= 400:
@@ -55,7 +55,7 @@ class Jenkins(object):
         self.auth = auth
         self.verify_ssl_cert = verify_ssl_cert
 
-    def _build_url(self, command, *args):
+    def _url(self, command, *args):
         """
         Build the proper Jenkins URL for the command.
         """
@@ -67,15 +67,41 @@ class Jenkins(object):
         """
         return command.format(root, *args)
 
-    def _get(self, url_pattern, *args):
-        response = requests.get(self._build_url(url_pattern, *args),
-                                auth=self.auth, verify=self.verify_ssl_cert)
+    def _http_get(self, url, **kwargs):
+        """
+        Perform an HTTP GET request.
+
+        This will add required authentication and SSL verification arguments.
+        """
+        response = requests.get(url,
+                                auth=self.auth,
+                                verify=self.verify_ssl_cert,
+                                **kwargs)
         return _validate(response)
 
-    def _post(self, url_pattern, *args):
-        response = requests.post(self._build_url(url_pattern, *args),
-                                 auth=self.auth, verify=self.verify_ssl_cert)
+    def _http_post(self, url, **kwargs):
+        """
+        Perform an HTTP POST request.
+
+        This will add required authentication and SSL verification arguments.
+        """
+        response = requests.post(url,
+                                 auth=self.auth,
+                                 verify=self.verify_ssl_cert,
+                                 **kwargs)
         return _validate(response)
+
+    def _build_get(self, url_pattern, *args, **kwargs):
+        """
+        Build proper URL from pattern and args, and perform an HTTP GET.
+        """
+        return self._http_get(self._url(url_pattern, *args), **kwargs)
+
+    def _build_post(self, url_pattern, *args, **kwargs):
+        """
+        Build proper URL from pattern and args, and perform an HTTP POST.
+        """
+        return self._http_post(self._url(url_pattern, *args), **kwargs)
 
     def all_jobs(self):
         """
@@ -84,7 +110,7 @@ class Jenkins(object):
         Color is ``blue``, ``yellow`` or ``red`` depending on build results
         (SUCCESS, UNSTABLE or FAILED).
         """
-        response = self._get(LIST)
+        response = self._build_get(LIST)
         jobs = eval(response.content).get('jobs', [])
         return [(job['name'], job['color']) for job in jobs]
 
@@ -92,13 +118,13 @@ class Jenkins(object):
         """
         Get the human-browseable URL for a job.
         """
-        return self._build_url(JOB_URL, jobname)
+        return self._url(JOB_URL, jobname)
 
     def job_info(self, jobname):
         """
         Get all information for a job as a Python object (dicts & lists).
         """
-        response = self._get(JOBINFO, jobname)
+        response = self._build_get(JOBINFO, jobname)
         return eval(response.content)
 
     def build_info(self, jobname, build_number=None):
@@ -111,7 +137,7 @@ class Jenkins(object):
             args = (BUILDINFO, jobname, build_number)
         else:
             args = (LAST_BUILD, jobname)
-        response = self._get(*args)
+        response = self._build_get(*args)
         return eval(response.content)
 
     def last_build_info(self, jobname):
@@ -124,7 +150,7 @@ class Jenkins(object):
         """
         Get full report of last build.
         """
-        response = self._get(LAST_REPORT, jobname)
+        response = self._build_get(LAST_REPORT, jobname)
         return eval(response.content)
 
     def last_result(self, jobname):
@@ -132,32 +158,30 @@ class Jenkins(object):
         Obtain results from last execution.
         """
         last_result_url = self.job_info(jobname)['lastBuild']['url']
-        response = requests.get(last_result_url + API, auth=self.auth, verify=self.verify_ssl_cert)
+        response = self._http_get(last_result_url + API)
         return eval(response.content)
 
     def last_success(self, jobname):
         """
         Return information about the last successful build.
         """
-        response = self._get(LAST_SUCCESS, jobname)
+        response = self._build_get(LAST_SUCCESS, jobname)
         return eval(response.content)
 
     def get_config_xml(self, jobname):
         """
         Get the ``config.xml`` file that contains the job definition.
         """
-        response = self._get(CONFIG, jobname)
+        response = self._build_get(CONFIG, jobname)
         return response.content
 
     def set_config_xml(self, jobname, config):
         """
         Replace the ``config.xml`` of an existing job.
         """
-        return requests.post(self._build_url(CONFIG, jobname),
-                             data=config,
-                             headers={'Content-Type': 'application/xml'},
-                             auth=self.auth,
-                             verify=self.verify_ssl_cert)
+        return self._build_post(CONFIG, jobname,
+                                data=config,
+                                headers={'Content-Type': 'application/xml'})
 
     def create(self, jobname, config_file, **context):
         """
@@ -170,12 +194,10 @@ class Jenkins(object):
         template = Template(content)
         content = template.render(**context)
 
-        return requests.post(self._build_url(NEWJOB),
-                             data=content,
-                             params=params,
-                             headers={'Content-Type': 'application/xml'},
-                             auth=self.auth,
-                             verify=self.verify_ssl_cert)
+        return self._build_post(NEWJOB,
+                                data=content,
+                                params=params,
+                                headers={'Content-Type': 'application/xml'})
 
     def create_copy(self, jobname, template_job, enable=True, **context):
         """
@@ -193,33 +215,27 @@ class Jenkins(object):
             config = config.replace('<disabled>true</disabled>',
                                     '<disabled>false</disabled>')
 
-        return requests.post(self._build_url(NEWJOB),
-                             data=config,
-                             params={'name': jobname},
-                             headers={'Content-Type': 'application/xml'},
-                             auth=self.auth,
-                             verify=self.verify_ssl_cert)
+        return self._build_post(NEWJOB,
+                                data=config,
+                                params={'name': jobname},
+                                headers={'Content-Type': 'application/xml'})
 
     def transfer(self, jobname, to_server):
         """
         Copy a job to another server.
         """
         config = self.get_config_xml(jobname)
-        return requests.post(self._other_url(to_server, NEWJOB),
-                             data=config,
-                             params={'name': jobname},
-                             headers={'Content-Type': 'application/xml'},
-                             auth=self.auth,
-                             verify=self.verify_ssl_cert)
+        return self._http_post(self._other_url(to_server, NEWJOB),
+                               data=config,
+                               params={'name': jobname},
+                               headers={'Content-Type': 'application/xml'})
 
     def copy(self, jobname, copy_from='template'):
         """
         Copy a job from another one (by default from one called ``template``).
         """
         params = {'name': jobname, 'mode': 'copy', 'from': copy_from}
-        return requests.post(self._build_url(NEWJOB), params=params,
-                             auth=self.auth,
-                             verify=self.verify_ssl_cert)
+        return self._build_post(NEWJOB, params=params)
 
     def build(self, jobname, wait=False, grace=10):
         """
@@ -228,7 +244,7 @@ class Jenkins(object):
         :param wait:
             If ``True``, wait until job completes building before returning
         """
-        response = self._post(BUILD, jobname)
+        response = self._build_post(BUILD, jobname)
         if not wait:
             return response
         else:
@@ -240,19 +256,19 @@ class Jenkins(object):
         """
         Delete a job.
         """
-        return self._post(DELETE, jobname)
+        return self._build_post(DELETE, jobname)
 
     def enable(self, jobname):
         """
         Trigger Jenkins to enable a job.
         """
-        return self._post(ENABLE, jobname)
+        return self._build_post(ENABLE, jobname)
 
     def disable(self, jobname):
         """
         Trigger Jenkins to disable a job.
         """
-        return self._post(DISABLE, jobname)
+        return self._build_post(DISABLE, jobname)
 
     def is_building(self, jobname):
         """
