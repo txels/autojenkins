@@ -59,7 +59,7 @@ class TestJenkins(TestCase):
         self.assertEqual(23, response['result'])
         self.assertEqual(
             (('https://builds.apache.org/job/Solr-Trunk/1783/api/python',),
-             {'auth': None}),
+             {'auth': None, 'verify': True}),
             requests.get.call_args_list[1]
         )
 
@@ -145,7 +145,7 @@ class TestJenkins(TestCase):
             auth=None,
             headers={'Content-Type': 'application/xml'},
             params={'name': 'job'},
-            data=CFG)
+            data=CFG, verify=True)
 
     def test_create_copy(self, requests):
         requests.get.return_value = mock_response('create_copy.txt')
@@ -157,7 +157,7 @@ class TestJenkins(TestCase):
             auth=None,
             headers={'Content-Type': 'application/xml'},
             params={'name': 'job'},
-            data=CFG)
+            data=CFG, verify= True)
 
     def test_transfer(self, requests):
         requests.get.return_value = mock_response('transfer.txt')
@@ -169,7 +169,7 @@ class TestJenkins(TestCase):
             auth=None,
             headers={'Content-Type': 'application/xml'},
             params={'name': 'job'},
-            data=CFG)
+            data=CFG, verify=True)
 
     @data(
         ('build', 'job/{0}/build'),
@@ -185,7 +185,7 @@ class TestJenkins(TestCase):
         self.assertEqual(302, response.status_code)
         requests.post.assert_called_once_with(
             'http://jenkins/' + url.format('name'),
-            auth=None)
+            auth=None, verify=True)
 
     def test_set_config_xml(self, requests):
         requests.post.return_value = Mock()
@@ -197,7 +197,7 @@ class TestJenkins(TestCase):
             'http://jenkins/job/name/config.xml',
             headers={'Content-Type': 'application/xml'},
             data=CFG,
-            auth=None)
+            auth=None, verify=True)
 
     @patch('autojenkins.jobs.time')
     @patch('autojenkins.jobs.Jenkins.last_result')
@@ -211,7 +211,7 @@ class TestJenkins(TestCase):
         self.assertEqual({'result': 'HELLO'}, result)
         requests.post.assert_called_once_with(
             'http://jenkins/job/name/build',
-            auth=None)
+            auth=None, verify=True)
         last_result.assert_called_once_with('name')
         time.sleep.assert_called_once_with(10)
 
