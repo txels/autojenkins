@@ -25,9 +25,9 @@ Sample use:
     from autojenkins import Jenkins
 
     j = Jenkins('http://jenkins.pe.local')
-    #You can now add verify_ssl_cert=False argument to the instantiation
-    #so that all requests will ignore SSL certificate errros, should you need that 
-    #i.e. j = Jenkins('https://my.secure.jenkins', verify_ssl_cert=False)
+    # You can add verify_ssl_cert=False argument to the instantiation
+    # so that all requests will ignore SSL certificate errors, should you need that 
+    # i.e. j = Jenkins('https://my.secure.jenkins', verify_ssl_cert=False)
 
     # trigger a manual build and check results
     j.build('warehouse-screens-us544_login')
