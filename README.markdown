@@ -1,3 +1,5 @@
+![Travis CI](https://travis-ci.org/txels/autojenkins.png)
+
 autojenkins
 ===========
 
