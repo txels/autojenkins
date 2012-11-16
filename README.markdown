@@ -1,4 +1,4 @@
-![Travis CI](https://travis-ci.org/txels/autojenkins.png)
+[![Travis CI](https://travis-ci.org/txels/autojenkins.png)](https://travis-ci.org/txels/autojenkins)
 
 autojenkins
 ===========
