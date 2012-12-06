@@ -265,7 +265,10 @@ class Jenkins(object):
         """
         Delete a job.
         """
-        return self._build_post(DELETE, jobname)
+        if self.job_exists(jobname):
+            return self._build_post(DELETE, jobname)
+        else:
+            raise Exception("Job doesn't exist")
 
     def enable(self, jobname):
         """
