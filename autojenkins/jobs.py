@@ -114,6 +114,12 @@ class Jenkins(object):
         jobs = eval(response.content).get('jobs', [])
         return [(job['name'], job['color']) for job in jobs]
 
+    def job_exists(self, jobname):
+        jobs = self.all_jobs()
+        for (name, color) in jobs:
+            if name == jobname:
+                return True
+
     def job_url(self, jobname):
         """
         Get the human-browseable URL for a job.
@@ -193,11 +199,14 @@ class Jenkins(object):
 
         template = Template(content)
         content = template.render(**context)
-
-        return self._build_post(NEWJOB,
-                                data=content,
-                                params=params,
-                                headers={'Content-Type': 'application/xml'})
+        
+        if self.job_exists(jobname):
+            raise Exception("Job already exists")
+        else:
+            return self._build_post(NEWJOB,
+                    data=content,
+                    params=params,
+                    headers={'Content-Type': 'application/xml'})
 
     def create_copy(self, jobname, template_job, enable=True, **context):
         """
