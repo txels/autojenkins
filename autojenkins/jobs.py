@@ -50,10 +50,11 @@ def _validate(response):
 class Jenkins(object):
     """Main class to interact with a Jenkins server."""
 
-    def __init__(self, base_url, auth=None, verify_ssl_cert=True):
+    def __init__(self, base_url, auth=None, verify_ssl_cert=True, proxies={}):
         self.ROOT = base_url
         self.auth = auth
         self.verify_ssl_cert = verify_ssl_cert
+        self.proxies = proxies
 
     def _url(self, command, *args):
         """
@@ -76,6 +77,7 @@ class Jenkins(object):
         response = requests.get(url,
                                 auth=self.auth,
                                 verify=self.verify_ssl_cert,
+                                proxies=self.proxies,
                                 **kwargs)
         return _validate(response)
 
@@ -88,6 +90,7 @@ class Jenkins(object):
         response = requests.post(url,
                                  auth=self.auth,
                                  verify=self.verify_ssl_cert,
+                                 proxies=self.proxies,
                                  **kwargs)
         return _validate(response)
 
