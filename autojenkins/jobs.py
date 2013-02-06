@@ -212,6 +212,12 @@ class Jenkins(object):
         """
         Create a job from a template job.
         """
+        if not self.job_exists(template_job):
+            raise Exception("Template job doesn't exists")
+
+        if self.job_exists(jobname):
+            raise Exception("Another job with this name already exists")
+
         config = self.get_config_xml(template_job)
 
         # remove stupid quotes added by Jenkins
