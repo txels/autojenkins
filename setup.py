@@ -18,10 +18,7 @@ setup(
     install_requires=['requests', 'jinja2'],
     entry_points = dict(
         console_scripts = [
-            'ajk-create = autojenkins.run:Commands.create',
-            'ajk-build = autojenkins.run:Commands.build',
-            'ajk-delete = autojenkins.run:Commands.delete',
-            'ajk-list = autojenkins.run:Commands.list',
+            'autojenkins = autojenkins.run:Commands.main'
         ],
     ),
     #include_package_data=True,
