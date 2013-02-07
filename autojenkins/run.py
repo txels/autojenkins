@@ -1,5 +1,30 @@
+"""Autojenkins CLI
+
+Usage:
+  autojenkins list <host> [(--user=<USER> --password=<PASSWORD>)] [--proxy=<PROXY>][-nr]
+  autojenkins create <jobname> <host> <template> [(--user=<USER> --password=<PASSWORD>)] [--build][--proxy=<PROXY>]
+  autojenkins build <jobname> <host> [(--user=<USER> --password=<PASSWORD>)][--wait][--proxy=<PROXY>]
+  autojenkins delete <jobname> <host>[(--user=<USER> --password=<PASSWORD>)][--proxy=<PROXY>]
+  autojenkins --version
+  autojenkins -h | --help
+
+Options:
+  -h, --help               show this help message and exit
+  --version                Show version
+  -u USER, --user=USER     username
+  -p PASSWORD, --password=PASSWORD
+                           password or API token
+  -x, --proxy=PROXY        Proxyserver (Host:Port)
+  -b, --build              start build after creation
+  -w, --wait               wait until the build completes
+  -n, --no-color           do not use colored output
+  -r, --raw                print raw list of jobs
+
+"""
+
 import optparse
 import sys
+from docopt import docopt
 
 from autojenkins import Jenkins
 
@@ -142,6 +167,10 @@ def list_jobs(host, options, color=True, raw=False):
 
 
 class Commands:
+    @staticmethod
+    def main():
+		args = docopt(__doc__, version='autojenkins 0.9.1', options_first=True)
+
     @staticmethod
     def create():
         parser = create_opts_parser('create a job')
