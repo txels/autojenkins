@@ -222,21 +222,3 @@ class Commands:
             delete_jobs(host, jobnames, options)
         else:
             parser.print_help()
-
-    @staticmethod
-    def list():
-        parser = create_opts_parser('list all jobs', params='')
-        parser.add_option('-n', '--no-color',
-                          action="store_true", dest="color", default=False,
-                          help='do not use colored output')
-        parser.add_option('-r', '--raw',
-                          action="store_true", dest="raw", default=False,
-                          help='print raw list of jobs')
-
-        (options, args) = parser.parse_args()
-
-        if len(args) == 1:
-            host, = args
-            list_jobs(host, options, not options.color, options.raw)
-        else:
-            parser.print_help()
