@@ -37,7 +37,7 @@ COLOR_MEANING = {
     'disabled': ('0;37', 'DISABLED'),
     'grey': ('1;37', 'NOT BUILT'),
 }
-
+# [(--user=<USER> --password=<PASSWORD>)] [--proxy=<PROXY>] [-nr]
 
 def create_opts_parser(command, params="[jobname] [options]"):
     """
@@ -63,23 +63,23 @@ def get_variables(options):
     data = dict(map(split_eq, options.D))
     return data
 
-def get_proxy(options):
+def get_proxy(args):
     """
     Return a proxy dictionary
     """
-    if hasattr(options, 'proxy'):
-        return { "http"  : options.proxy, "https" : options.proxy }
-    else:
+    if args['--proxy'] == None:
         return { "http"  : "", "https" : "" }
+    else:
+        return { "http"  : args['--proxy'], "https" : args['--proxy'] }
 
-def get_auth(options):
+def get_auth(args):
     """
     Return a tuple of (user, password) or None if no authentication
     """
-    if hasattr(options, 'user'):
-        return (options.user, getattr(options, 'password', None))
-    else:
+    if args['--user'] == None:
         return None
+    else:
+        return (args['--user'], args['--password'])
 
 
 def create_job(host, jobname, options):
@@ -169,8 +169,9 @@ def list_jobs(host, options, color=True, raw=False):
 class Commands:
     @staticmethod
     def main():
-		args = docopt(__doc__, version='autojenkins 0.9.1', options_first=True)
-
+        args = docopt(__doc__, version='autojenkins 0.9.0-docopt')
+        if args['list']:
+            list_jobs(args['<host>'], args, not args['--no-color'], args['--raw'])
     @staticmethod
     def create():
         parser = create_opts_parser('create a job')
