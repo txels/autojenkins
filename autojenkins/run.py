@@ -25,6 +25,8 @@ def create_opts_parser(command, params="[jobname] [options]"):
                       help='username')
     parser.add_option('-p', '--password',
                       help='password or token')
+    parser.add_option('-x', '--proxy',
+                      help='proxy server (host:port)')
     return parser
 
 
@@ -36,6 +38,14 @@ def get_variables(options):
     data = dict(map(split_eq, options.D))
     return data
 
+def get_proxy(options):
+    """
+    Return a proxy dictionary
+    """
+    if hasattr(options, 'proxy'):
+        return { "http"  : options.proxy, "https" : options.proxy }
+    else:
+        return { "http"  : "", "https" : "" }
 
 def get_auth(options):
     """
@@ -58,7 +68,7 @@ def create_job(host, jobname, options):
       {2}
     """.format(jobname, options.template, data))
 
-    jenkins = Jenkins(host, auth=get_auth(options))
+    jenkins = Jenkins(host, proxies=get_proxy(options), auth=get_auth(options))
     response = jenkins.create_copy(jobname, options.template, **data)
     if response.status_code == 200 and options.build:
         print('Triggering build.')
@@ -82,7 +92,7 @@ def build_job(host, jobname, options):
     """
     print ("Start building job '{0}'".format(jobname))
 
-    jenkins = Jenkins(host, auth=get_auth(options))
+    jenkins = Jenkins(host, proxies=get_proxy(options), auth=get_auth(options))
     response = jenkins.build(jobname, wait=options.wait)
     if options.wait:
         result = response['result']
@@ -96,7 +106,7 @@ def delete_jobs(host, jobnames, options):
     """
     Delete existing jobs.
     """
-    jenkins = Jenkins(host, auth=get_auth(options))
+    jenkins = Jenkins(host, proxies=get_proxy(options), auth=get_auth(options))
     for jobname in jobnames:
         print ("Deleting job '{0}'".format(jobname))
         response = jenkins.delete(jobname)
@@ -118,7 +128,7 @@ def list_jobs(host, options, color=True, raw=False):
         position = 1
     if not raw:
         print ("All jobs in {0}".format(host))
-    jenkins = Jenkins(host, auth=get_auth(options))
+    jenkins = Jenkins(host, proxies=get_proxy(options), auth=get_auth(options))
     jobs = jenkins.all_jobs()
     for name, color in jobs:
         if '_' in color:
