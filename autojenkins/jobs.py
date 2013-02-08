@@ -3,6 +3,13 @@ import time
 import requests
 from jinja2 import Template
 
+class AutojenkinsError(Exception):
+    pass
+class JobInexistent(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+    def __str__(self):
+        return repr(self.msg)
 
 API = 'api/python'
 NEWJOB = '{0}/createItem'
@@ -24,13 +31,21 @@ DISABLE = '{0}/job/{1}/disable'
 class HttpStatusError(Exception):
     pass
 
+class HttpUnauthorized(Exception):
+    pass
+
+
+class HttpForbidden(Exception):
+    pass
 
 class HttpNotFoundError(HttpStatusError):
     pass
 
 
 HTTP_ERROR_MAP = {
-    404: HttpNotFoundError,
+    401: HttpUnauthorized, #credentials wrong
+    403: HttpForbidden, #insufficient rights
+    404: HttpNotFoundError
 }
 
 
@@ -277,7 +292,7 @@ class Jenkins(object):
         if self.job_exists(jobname):
             return self._build_post(DELETE, jobname)
         else:
-            raise Exception("Job doesn't exist")
+            raise JobInexistent("Job '%s' doesn't exist" % jobname)
 
     def enable(self, jobname):
         """
