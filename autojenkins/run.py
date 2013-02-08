@@ -4,7 +4,7 @@ Usage:
   autojenkins list <host> [(--user=<USER> --password=<PASSWORD>)] [--proxy=<PROXY>][-nr]
   autojenkins create <jobname> <host> <template> [(--user=<USER> --password=<PASSWORD>)] [--build][--proxy=<PROXY>]
   autojenkins build <jobname> <host> [(--user=<USER> --password=<PASSWORD>)][--wait][--proxy=<PROXY>]
-  autojenkins delete <jobname> <host>[(--user=<USER> --password=<PASSWORD>)][--proxy=<PROXY>]
+  autojenkins delete <host> <jobname>... [(--user=<USER> --password=<PASSWORD>)][--proxy=<PROXY>]
   autojenkins --version
   autojenkins -h | --help
 
@@ -26,7 +26,7 @@ import optparse
 import sys
 from docopt import docopt
 
-from autojenkins import Jenkins
+from autojenkins import Jenkins, jobs
 
 COLOR_MEANING = {
     'blue': ('1;32', 'SUCCESS'),
@@ -134,9 +134,14 @@ def delete_jobs(host, jobnames, options):
     jenkins = Jenkins(host, proxies=get_proxy(options), auth=get_auth(options))
     for jobname in jobnames:
         print ("Deleting job '{0}'".format(jobname))
-        response = jenkins.delete(jobname)
-        print(response.status_code)
-
+        try:
+            response = jenkins.delete(jobname)
+            if response.status_code == 200:
+                print "Job '%s' deleted" % jobname
+        except jobs.JobInexistent as error:
+            print "Error: %s" % error.msg
+        except (jobs.HttpForbidden, jobs.HttpUnauthorized):
+            pass
 
 def list_jobs(host, options, color=True, raw=False):
     """
@@ -172,6 +177,8 @@ class Commands:
         args = docopt(__doc__, version='autojenkins 0.9.0-docopt')
         if args['list']:
             list_jobs(args['<host>'], args, not args['--no-color'], args['--raw'])
+        elif args['delete']:
+            delete_jobs(args['<host>'], args['<jobname>'], args)
     @staticmethod
     def create():
         parser = create_opts_parser('create a job')
