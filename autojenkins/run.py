@@ -216,16 +216,3 @@ class Commands:
                 sys.exit(1)
         else:
             parser.print_help()
-
-    @staticmethod
-    def delete():
-        parser = create_opts_parser('delete one or more jobs',
-                                    params="[jobname]+ [options]")
-
-        (options, args) = parser.parse_args()
-
-        if len(args) >= 2:
-            host, jobnames = args[0], args[1:]
-            delete_jobs(host, jobnames, options)
-        else:
-            parser.print_help()
