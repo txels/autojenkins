@@ -3,7 +3,7 @@
 Usage:
   autojenkins list <host> [(--user=<USER> --password=<PASSWORD>)] [--proxy=<PROXY>][-nr]
   autojenkins create <jobname> <host> <template> [(--user=<USER> --password=<PASSWORD>)] [--build][--proxy=<PROXY>]
-  autojenkins build <jobname> <host> [(--user=<USER> --password=<PASSWORD>)][--wait][--proxy=<PROXY>]
+  autojenkins build <host> <jobname> [(--user=<USER> --password=<PASSWORD>)][--wait][--proxy=<PROXY>]
   autojenkins delete <host> <jobname>... [(--user=<USER> --password=<PASSWORD>)][--proxy=<PROXY>]
   autojenkins --version
   autojenkins -h | --help
@@ -116,16 +116,19 @@ def build_job(host, jobname, options):
          * If not wait: ``True`` if HTTP status code is not an error code
     """
     print ("Start building job '{0}'".format(jobname))
-
     jenkins = Jenkins(host, proxies=get_proxy(options), auth=get_auth(options))
-    response = jenkins.build(jobname, wait=options.wait)
-    if options.wait:
-        result = response['result']
-        print('Result = "{0}"'.format(result))
-        return result == 'SUCCESS'
-    else:
-        return response.status_code < 400
-
+    try:
+        response = jenkins.build(jobname, wait=options['--wait'])
+        if options['--wait']:
+            result = response['result']
+            print('Result = "{0}"'.format(result))
+            return result == 'SUCCESS'
+        else:
+            print "Build '%s' started" % jobname
+            return response.status_code < 400
+    except (jobs.JobInexistent, jobs.JobNotBuildable) as error:
+        print "Error: %s" % error.msg
+        return False
 
 def delete_jobs(host, jobnames, options):
     """
@@ -179,6 +182,11 @@ class Commands:
             list_jobs(args['<host>'], args, not args['--no-color'], args['--raw'])
         elif args['delete']:
             delete_jobs(args['<host>'], args['<jobname>'], args)
+        elif args['build']:
+            success = build_job(args['<host>'], args['<jobname>'][0], args)
+            if not success:
+                sys.exit(1)
+
     @staticmethod
     def create():
         parser = create_opts_parser('create a job')
