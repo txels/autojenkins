@@ -11,6 +11,12 @@ class JobInexistent(Exception):
     def __str__(self):
         return repr(self.msg)
 
+class JobNotBuildable(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+    def __str__(self):
+        return repr(self.msg)
+
 API = 'api/python'
 NEWJOB = '{0}/createItem'
 JOB_URL = '{0}/job/{1}'
@@ -277,6 +283,10 @@ class Jenkins(object):
         :param wait:
             If ``True``, wait until job completes building before returning
         """
+        if not self.job_exists(jobname):
+            raise JobInexistent("Job '%s' doesn't exists" % jobname)
+        if not self.job_info(jobname)['buildable']:
+            raise JobNotBuildable("Job '%s' is not buildable (deactivated)." % jobname)
         response = self._build_post(BUILD, jobname)
         if not wait:
             return response
