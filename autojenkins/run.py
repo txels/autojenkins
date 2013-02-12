@@ -2,7 +2,7 @@
 
 Usage:
   autojenkins list <host> [(--user=<USER> --password=<PASSWORD>)] [--proxy=<PROXY>][-nr]
-  autojenkins create <jobname> <host> <template> [(--user=<USER> --password=<PASSWORD>)] [--build][--proxy=<PROXY>]
+  autojenkins create <host> <jobname> <template> [-D=<VAR=VALUE>]... [(--user=<USER> --password=<PASSWORD>)] [--build][--proxy=<PROXY>]
   autojenkins build <host> <jobname> [(--user=<USER> --password=<PASSWORD>)][--wait][--proxy=<PROXY>]
   autojenkins delete <host> <jobname>... [(--user=<USER> --password=<PASSWORD>)][--proxy=<PROXY>]
   autojenkins --version
@@ -14,6 +14,7 @@ Options:
   -u USER, --user=USER     username
   -p PASSWORD, --password=PASSWORD
                            password or API token
+  -D VAR=VALUE            substitution variables to be used in the template
   -x, --proxy=PROXY        Proxyserver (Host:Port)
   -b, --build              start build after creation
   -w, --wait               wait until the build completes
@@ -60,7 +61,7 @@ def get_variables(options):
     Read all variables and values from ``-Dvariable=value`` options
     """
     split_eq = lambda x: x.split('=')
-    data = dict(map(split_eq, options.D))
+    data = dict(map(split_eq, options))
     return data
 
 def get_proxy(args):
@@ -86,20 +87,24 @@ def create_job(host, jobname, options):
     """
     Create a new job
     """
-    data = get_variables(options)
+    data = get_variables(options['-D'])
 
     print ("""
     Creating job '{0}' from template '{1}' with:
       {2}
-    """.format(jobname, options.template, data))
+    """.format(jobname, options['<template>'], data))
 
     jenkins = Jenkins(host, proxies=get_proxy(options), auth=get_auth(options))
-    response = jenkins.create_copy(jobname, options.template, **data)
-    if response.status_code == 200 and options.build:
-        print('Triggering build.')
-        jenkins.build(jobname)
-    print ('Job URL: {0}'.format(jenkins.job_url(jobname)))
-    return response.status_code
+    try:
+        response = jenkins.create_copy(jobname, options['<template>'], **data)
+        if response.status_code == 200 and options['--build']:
+            print('Triggering build.')
+            jenkins.build(jobname)
+        print ('Job URL: {0}'.format(jenkins.job_url(jobname)))
+        return response.status_code < 400
+    except jobs.JobExists as error:
+        print "Error: %s" % error.msg
+        return False
 
 
 def build_job(host, jobname, options):
@@ -179,13 +184,16 @@ class Commands:
     def main():
         args = docopt(__doc__, version='autojenkins 0.9.0-docopt')
         if args['list']:
-            list_jobs(args['<host>'], args, not args['--no-color'], args['--raw'])
+            list_jobs(args['<host>'], args, not args['--no-color'], \
+            args['--raw'])
         elif args['delete']:
             delete_jobs(args['<host>'], args['<jobname>'], args)
         elif args['build']:
             success = build_job(args['<host>'], args['<jobname>'][0], args)
             if not success:
                 sys.exit(1)
+        elif args['create']:
+            success = create_job(args['<host>'], args['<jobname>'][0], args)
 
     @staticmethod
     def create():
