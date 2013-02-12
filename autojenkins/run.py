@@ -175,8 +175,8 @@ def list_jobs(host, options, color=True, raw=False):
     if not raw:
         print ("All jobs in {0}".format(host))
     jenkins = Jenkins(host, proxies=get_proxy(options), auth=get_auth(options))
-    jobs = jenkins.all_jobs()
-    for name, color in jobs:
+    joblist = jenkins.all_jobs()
+    for name, color in joblist:
         if '_' in color:
             color = color.split('_')[0]
             building = True
@@ -202,3 +202,5 @@ class Commands:
                 sys.exit(1)
         elif args['create']:
             success = create_job(args['<host>'], args['<jobname>'][0], args)
+            if not success:
+                sys.exit(1)
