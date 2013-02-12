@@ -11,6 +11,12 @@ class JobInexistent(Exception):
     def __str__(self):
         return repr(self.msg)
 
+class JobExists(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+    def __str__(self):
+        return repr(self.msg)
+
 class JobNotBuildable(Exception):
     def __init__(self, msg):
         self.msg = msg
@@ -237,10 +243,11 @@ class Jenkins(object):
         Create a job from a template job.
         """
         if not self.job_exists(template_job):
-            raise Exception("Template job doesn't exists")
+            raise JobInexistent("Template job '%s' doesn't exists" % jobname)
 
         if self.job_exists(jobname):
-            raise Exception("Another job with this name already exists")
+            raise JobExists("Another job with the name '%s'already exists" \
+            % jobname)
 
         config = self.get_config_xml(template_job)
 
@@ -249,6 +256,7 @@ class Jenkins(object):
         config = config.replace('}}&quot;<', '}}<')
 
         template_config = Template(config)
+
         config = template_config.render(**context)
         if enable:
             config = config.replace('<disabled>true</disabled>',
@@ -286,7 +294,8 @@ class Jenkins(object):
         if not self.job_exists(jobname):
             raise JobInexistent("Job '%s' doesn't exists" % jobname)
         if not self.job_info(jobname)['buildable']:
-            raise JobNotBuildable("Job '%s' is not buildable (deactivated)." % jobname)
+            raise JobNotBuildable("Job '%s' is not buildable (deactivated)." \
+            % jobname)
         response = self._build_post(BUILD, jobname)
         if not wait:
             return response
