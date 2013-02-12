@@ -73,7 +73,7 @@ def get_proxy(args):
     """
     Return a proxy dictionary
     """
-    if args['--proxy'] is None:
+    if args is None or args['--proxy'] is None:
         return {"http": "", "https": ""}
     else:
         return {"http": args['--proxy'], "https": args['--proxy']}
@@ -83,7 +83,7 @@ def get_auth(args):
     """
     Return a tuple of (user, password) or None if no authentication
     """
-    if args['--user'] is None:
+    if args is None or args['--user'] is None:
         return None
     else:
         return (args['--user'], args['--password'])

@@ -42,6 +42,7 @@ class TestJenkins(TestCase):
         jobs = self.jenkins.all_jobs()
         requests.get.assert_called_once_with('http://jenkins/api/python',
                                              verify=True,
+                                             proxies={},
                                              auth=None)
         self.assertEqual(jobs, [('job1', 'blue')])
 
@@ -59,7 +60,7 @@ class TestJenkins(TestCase):
         self.assertEqual(23, response['result'])
         self.assertEqual(
             (('https://builds.apache.org/job/Solr-Trunk/1783/api/python',),
-             {'auth': None, 'verify': True}),
+             {'auth': None, 'verify': True, 'proxies': {}}),
             requests.get.call_args_list[1]
         )
 
@@ -77,6 +78,7 @@ class TestJenkins(TestCase):
         requests.get.assert_called_once_with(
             'http://jenkins/' + url.format('name'),
             verify=True,
+            proxies={},
             auth=None)
         getattr(self, 'checks_{0}'.format(method))(response)
 
@@ -87,6 +89,7 @@ class TestJenkins(TestCase):
         requests.get.assert_called_once_with(
             'http://jenkins/' + url,
             verify=True,
+            proxies={},
             auth=None)
 
     def check_result(self, response, route, value):
@@ -105,7 +108,7 @@ class TestJenkins(TestCase):
              (('lastSuccessfulBuild', 'number'), 1778),
              (('lastSuccessfulBuild', 'url'),
               'https://builds.apache.org/job/Solr-Trunk/1778/'),
-            ])
+             ])
 
     def checks_last_build_info(self, response):
         self.check_results(
@@ -114,7 +117,7 @@ class TestJenkins(TestCase):
              (('number',), 1783),
              (('result',), 'FAILURE'),
              (('changeSet', 'kind'), 'svn'),
-            ])
+             ])
 
     def checks_last_build_report(self, response):
         self.check_results(
@@ -122,7 +125,7 @@ class TestJenkins(TestCase):
             [(('duration',), 692.3089),
              (('failCount',), 1),
              (('suites', 0, 'name'), 'org.apache.solr.BasicFunctionalityTest'),
-            ])
+             ])
 
     def checks_last_success(self, response):
         self.check_results(
@@ -131,7 +134,7 @@ class TestJenkins(TestCase):
              (('building',), False),
              (('artifacts', 0, 'displayPath'),
               'apache-solr-4.0-2012-02-29_09-07-30-src.tgz'),
-            ])
+             ])
 
     def checks_get_config_xml(self, response):
         self.assertTrue(response.startswith('<?xml'))
@@ -150,6 +153,7 @@ class TestJenkins(TestCase):
             headers={'Content-Type': 'application/xml'},
             params={'name': 'job'},
             data=CFG,
+            proxies={},
             verify=True)
 
     def test_create_copy(self, requests):
@@ -163,6 +167,7 @@ class TestJenkins(TestCase):
             headers={'Content-Type': 'application/xml'},
             params={'name': 'job'},
             data=CFG,
+            proxies={},
             verify=True)
 
     def test_transfer(self, requests):
@@ -176,6 +181,7 @@ class TestJenkins(TestCase):
             headers={'Content-Type': 'application/xml'},
             params={'name': 'job'},
             data=CFG,
+            proxies={},
             verify=True)
 
     @data(
@@ -193,6 +199,7 @@ class TestJenkins(TestCase):
         requests.post.assert_called_once_with(
             'http://jenkins/' + url.format('name'),
             auth=None,
+            proxies={},
             verify=True)
 
     def test_set_config_xml(self, requests):
@@ -206,6 +213,7 @@ class TestJenkins(TestCase):
             headers={'Content-Type': 'application/xml'},
             data=CFG,
             auth=None,
+            proxies={},
             verify=True)
 
     @patch('autojenkins.jobs.time')
