@@ -3,23 +3,31 @@ import time
 import requests
 from jinja2 import Template
 
+
 class AutojenkinsError(Exception):
     pass
+
+
 class JobInexistent(Exception):
     def __init__(self, msg):
         self.msg = msg
+
     def __str__(self):
         return repr(self.msg)
+
 
 class JobExists(Exception):
     def __init__(self, msg):
         self.msg = msg
+
     def __str__(self):
         return repr(self.msg)
+
 
 class JobNotBuildable(Exception):
     def __init__(self, msg):
         self.msg = msg
+
     def __str__(self):
         return repr(self.msg)
 
@@ -43,6 +51,7 @@ DISABLE = '{0}/job/{1}/disable'
 class HttpStatusError(Exception):
     pass
 
+
 class HttpUnauthorized(Exception):
     pass
 
@@ -50,13 +59,14 @@ class HttpUnauthorized(Exception):
 class HttpForbidden(Exception):
     pass
 
+
 class HttpNotFoundError(HttpStatusError):
     pass
 
 
 HTTP_ERROR_MAP = {
-    401: HttpUnauthorized, #credentials wrong
-    403: HttpForbidden, #insufficient rights
+    401: HttpUnauthorized,  # credentials wrong
+    403: HttpForbidden,  # insufficient rights
     404: HttpNotFoundError
 }
 
@@ -229,14 +239,15 @@ class Jenkins(object):
 
         template = Template(content)
         content = template.render(**context)
-        
+
         if self.job_exists(jobname):
             raise Exception("Job already exists")
         else:
             return self._build_post(NEWJOB,
-                    data=content,
-                    params=params,
-                    headers={'Content-Type': 'application/xml'})
+                                    data=content,
+                                    params=params,
+                                    headers={'Content-Type': 'application/xml'}
+                                    )
 
     def create_copy(self, jobname, template_job, enable=True, **context):
         """
@@ -246,8 +257,8 @@ class Jenkins(object):
             raise JobInexistent("Template job '%s' doesn't exists" % jobname)
 
         if self.job_exists(jobname):
-            raise JobExists("Another job with the name '%s'already exists" \
-            % jobname)
+            raise JobExists("Another job with the name '%s'already exists"
+                            % jobname)
 
         config = self.get_config_xml(template_job)
 
@@ -294,8 +305,8 @@ class Jenkins(object):
         if not self.job_exists(jobname):
             raise JobInexistent("Job '%s' doesn't exists" % jobname)
         if not self.job_info(jobname)['buildable']:
-            raise JobNotBuildable("Job '%s' is not buildable (deactivated)." \
-            % jobname)
+            raise JobNotBuildable("Job '%s' is not buildable (deactivated)."
+                                  % jobname)
         response = self._build_post(BUILD, jobname)
         if not wait:
             return response
