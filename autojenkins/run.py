@@ -38,7 +38,6 @@ COLOR_MEANING = {
     'disabled': ('0;37', 'DISABLED'),
     'grey': ('1;37', 'NOT BUILT'),
 }
-# [(--user=<USER> --password=<PASSWORD>)] [--proxy=<PROXY>] [-nr]
 
 def create_opts_parser(command, params="[jobname] [options]"):
     """
@@ -194,24 +193,3 @@ class Commands:
                 sys.exit(1)
         elif args['create']:
             success = create_job(args['<host>'], args['<jobname>'][0], args)
-
-    @staticmethod
-    def create():
-        parser = create_opts_parser('create a job')
-        parser.add_option('-D', metavar='VAR=VALUE',
-                          action="append",
-                          help='substitution variables to be used in the '
-                               'template')
-        parser.add_option('-t', '--template', default='template',
-                          help='the template job to copy from')
-        parser.add_option('-b', '--build',
-                          action="store_true", dest="build", default=False,
-                          help='start a build right after creation')
-
-        (options, args) = parser.parse_args()
-
-        if len(args) == 2:
-            host, jobname = args
-            create_job(host, jobname, options)
-        else:
-            parser.print_help()
