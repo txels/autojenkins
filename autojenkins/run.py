@@ -207,20 +207,3 @@ class Commands:
             create_job(host, jobname, options)
         else:
             parser.print_help()
-
-    @staticmethod
-    def build():
-        parser = create_opts_parser('build a job')
-        parser.add_option('-w', '--wait',
-                          action="store_true", dest="wait", default=False,
-                          help='wait until the build completes')
-
-        (options, args) = parser.parse_args()
-
-        if len(args) == 2:
-            host, jobname = args
-            success = build_job(host, jobname, options)
-            if not success:
-                sys.exit(1)
-        else:
-            parser.print_help()
