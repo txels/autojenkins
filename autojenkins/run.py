@@ -1,10 +1,14 @@
 """Autojenkins CLI
 
 Usage:
-  autojenkins list <host> [(--user=<USER> --password=<PASSWORD>)] [--proxy=<PROXY>][-nr]
-  autojenkins create <host> <jobname> <template> [-D=<VAR=VALUE>]... [(--user=<USER> --password=<PASSWORD>)] [--build][--proxy=<PROXY>]
-  autojenkins build <host> <jobname> [(--user=<USER> --password=<PASSWORD>)][--wait][--proxy=<PROXY>]
-  autojenkins delete <host> <jobname>... [(--user=<USER> --password=<PASSWORD>)][--proxy=<PROXY>]
+  autojenkins list <host> [(--user=<USER> --password=<PASSWORD>)]
+            [--proxy=<PROXY>][-nr]
+  autojenkins create <host> <jobname> <template> [-D=<VAR=VALUE>]... [--build]
+            [(--user=<USER> --password=<PASSWORD>)] [--proxy=<PROXY>]
+  autojenkins build <host> <jobname> [--wait]
+            [(--user=<USER> --password=<PASSWORD>)][--proxy=<PROXY>]
+  autojenkins delete <host> <jobname>...
+            [(--user=<USER> --password=<PASSWORD>)][--proxy=<PROXY>]
   autojenkins --version
   autojenkins -h | --help
 
@@ -14,7 +18,7 @@ Options:
   -u USER, --user=USER     username
   -p PASSWORD, --password=PASSWORD
                            password or API token
-  -D VAR=VALUE            substitution variables to be used in the template
+  -D VAR=VALUE             substitution variables to be used in the template
   -x, --proxy=PROXY        Proxyserver (Host:Port)
   -b, --build              start build after creation
   -w, --wait               wait until the build completes
@@ -38,6 +42,7 @@ COLOR_MEANING = {
     'disabled': ('0;37', 'DISABLED'),
     'grey': ('1;37', 'NOT BUILT'),
 }
+
 
 def create_opts_parser(command, params="[jobname] [options]"):
     """
@@ -63,20 +68,22 @@ def get_variables(options):
     data = dict(map(split_eq, options))
     return data
 
+
 def get_proxy(args):
     """
     Return a proxy dictionary
     """
-    if args['--proxy'] == None:
-        return { "http"  : "", "https" : "" }
+    if args['--proxy'] is None:
+        return {"http": "", "https": ""}
     else:
-        return { "http"  : args['--proxy'], "https" : args['--proxy'] }
+        return {"http": args['--proxy'], "https": args['--proxy']}
+
 
 def get_auth(args):
     """
     Return a tuple of (user, password) or None if no authentication
     """
-    if args['--user'] == None:
+    if args['--user'] is None:
         return None
     else:
         return (args['--user'], args['--password'])
@@ -134,6 +141,7 @@ def build_job(host, jobname, options):
         print "Error: %s" % error.msg
         return False
 
+
 def delete_jobs(host, jobnames, options):
     """
     Delete existing jobs.
@@ -149,6 +157,7 @@ def delete_jobs(host, jobnames, options):
             print "Error: %s" % error.msg
         except (jobs.HttpForbidden, jobs.HttpUnauthorized):
             pass
+
 
 def list_jobs(host, options, color=True, raw=False):
     """
@@ -183,8 +192,8 @@ class Commands:
     def main():
         args = docopt(__doc__, version='autojenkins 0.9.0-docopt')
         if args['list']:
-            list_jobs(args['<host>'], args, not args['--no-color'], \
-            args['--raw'])
+            list_jobs(args['<host>'], args, not args['--no-color'],
+                      args['--raw'])
         elif args['delete']:
             delete_jobs(args['<host>'], args['<jobname>'], args)
         elif args['build']:
