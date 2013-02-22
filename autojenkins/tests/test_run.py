@@ -17,11 +17,14 @@ def test_delete_jobs(jenkins):
 
 
 @patch('autojenkins.run.Jenkins')
-def test_delete_jobs_authenticated(jenkins):
+@patch('autojenkins.jobs.Jenkins.job_exists')
+def test_delete_jobs_authenticated(job_exists, jenkins):
+    job_exists.return_value = True
     jenkins.return_value = Mock()
-    options = Mock()
-    options.user = 'carles'
-    options.password = 'secret'
+    options = {}
+    options['--user'] = 'carles'
+    options['--password'] = 'secret'
+    options['--proxy'] = ''
     delete_jobs('http://jenkins', ['hello'], options)
     jenkins.assert_called_with('http://jenkins', auth=('carles', 'secret'),
                                proxies={'http': '', 'https': ''})

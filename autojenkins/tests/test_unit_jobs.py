@@ -28,6 +28,15 @@ def mock_response(fixture=None, status=200):
     return response
 
 
+def side_effect_job_exists(*args, **kwargs):
+    if args[0] == 'job':
+        return False
+    elif args[0] == 'template':
+        return True
+    elif args[0] == 'name':
+        return True
+
+
 @ddt
 @patch('autojenkins.jobs.requests')
 class TestJenkins(TestCase):
@@ -141,8 +150,9 @@ class TestJenkins(TestCase):
         self.assertTrue(response.endswith('</project>'))
 
     # TODO: test job creation, and set_config_xml
-
-    def test_create(self, requests):
+    @patch('autojenkins.jobs.Jenkins.job_exists')
+    def test_create(self, job_exists, requests):
+        job_exists.side_effect = side_effect_job_exists
         requests.post.return_value = mock_response()
         config_xml = path.join(fixture_path, 'create_copy.txt')
         self.jenkins.create('job', config_xml, value='2')
@@ -156,7 +166,9 @@ class TestJenkins(TestCase):
             proxies={},
             verify=True)
 
-    def test_create_copy(self, requests):
+    @patch('autojenkins.jobs.Jenkins.job_exists')
+    def test_create_copy(self, job_exists, requests):
+        job_exists.side_effect = side_effect_job_exists
         requests.get.return_value = mock_response('create_copy.txt')
         requests.post.return_value = mock_response()
         self.jenkins.create_copy('job', 'template', value='2')
@@ -190,10 +202,15 @@ class TestJenkins(TestCase):
         ('enable', 'job/{0}/enable'),
         ('disable', 'job/{0}/disable'),
     )
-    def test_post_methods_with_jobname_no_data(self, case, requests):
+    @patch('autojenkins.jobs.Jenkins.job_info')
+    @patch('autojenkins.jobs.Jenkins.job_exists')
+    def test_post_methods_with_jobname_no_data(self, case, job_exists,
+                                               job_info, requests):
         method, url = case
         # Jenkins API post methods return status 302 upon success
         requests.post.return_value = mock_response(status=302)
+        job_exists.side_effect = side_effect_job_exists
+        job_info.return_value = {'buildable': True}
         response = getattr(self.jenkins, method)('name')
         self.assertEqual(302, response.status_code)
         requests.post.assert_called_once_with(
@@ -219,9 +236,13 @@ class TestJenkins(TestCase):
     @patch('autojenkins.jobs.time')
     @patch('autojenkins.jobs.Jenkins.last_result')
     @patch('autojenkins.jobs.Jenkins.wait_for_build')
-    def test_build_with_wait(self, wait_for_build, last_result, time,
-                             requests):
+    @patch('autojenkins.jobs.Jenkins.job_exists')
+    @patch('autojenkins.jobs.Jenkins.job_info')
+    def test_build_with_wait(self, job_info, job_exists, wait_for_build,
+                             last_result, time, requests):
         """Test building a job synchronously"""
+        job_exists.side_effect = side_effect_job_exists
+        job_info.return_value = {'buildable': True}
         requests.post.return_value = mock_response(status=302)
         last_result.return_value = {'result': 'HELLO'}
         result = self.jenkins.build('name', wait=True)
@@ -229,6 +250,7 @@ class TestJenkins(TestCase):
         requests.post.assert_called_once_with(
             'http://jenkins/job/name/build',
             auth=None,
+            proxies={},
             verify=True)
         last_result.assert_called_once_with('name')
         time.sleep.assert_called_once_with(10)
