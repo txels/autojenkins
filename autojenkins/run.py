@@ -27,7 +27,6 @@ Options:
 
 """
 
-import optparse
 import sys
 from docopt import docopt
 
@@ -42,22 +41,6 @@ COLOR_MEANING = {
     'disabled': ('0;37', 'DISABLED'),
     'grey': ('1;37', 'NOT BUILT'),
 }
-
-
-def create_opts_parser(command, params="[jobname] [options]"):
-    """
-    Create parser for command-line options
-    """
-    usage = "Usage: %prog host " + params
-    desc = 'Run autojenkins to {0}.'.format(command)
-    parser = optparse.OptionParser(description=desc, usage=usage)
-    parser.add_option('-u', '--user',
-                      help='username')
-    parser.add_option('-p', '--password',
-                      help='password or token')
-    parser.add_option('-x', '--proxy',
-                      help='proxy server (host:port)')
-    return parser
 
 
 def get_variables(options):
