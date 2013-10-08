@@ -11,6 +11,7 @@ COLOR_MEANING = {
     'aborted': ('1;37', 'ABORTED'),
     'disabled': ('0;37', 'DISABLED'),
     'grey': ('1;37', 'NOT BUILT'),
+    'notbuilt': ('1;37', 'NOT BUILT'),
 }
 
 
