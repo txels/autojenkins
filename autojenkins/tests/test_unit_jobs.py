@@ -28,6 +28,15 @@ def mock_response(fixture=None, status=200):
     return response
 
 
+def side_effect_job_exists(*args, **kwargs):
+    if args[0] == 'job':
+        return False
+    elif args[0] == 'template':
+        return True
+    elif args[0] == 'name':
+        return True
+
+
 @ddt
 @patch('autojenkins.jobs.requests')
 class TestJenkins(TestCase):
@@ -42,6 +51,7 @@ class TestJenkins(TestCase):
         jobs = self.jenkins.all_jobs()
         requests.get.assert_called_once_with('http://jenkins/api/python',
                                              verify=True,
+                                             proxies={},
                                              auth=None)
         self.assertEqual(jobs, [('job1', 'blue')])
 
@@ -59,7 +69,7 @@ class TestJenkins(TestCase):
         self.assertEqual(23, response['result'])
         self.assertEqual(
             (('https://builds.apache.org/job/Solr-Trunk/1783/api/python',),
-             {'auth': None, 'verify': True}),
+             {'auth': None, 'verify': True, 'proxies': {}}),
             requests.get.call_args_list[1]
         )
 
@@ -77,6 +87,7 @@ class TestJenkins(TestCase):
         requests.get.assert_called_once_with(
             'http://jenkins/' + url.format('name'),
             verify=True,
+            proxies={},
             auth=None)
         getattr(self, 'checks_{0}'.format(method))(response)
 
@@ -87,6 +98,7 @@ class TestJenkins(TestCase):
         requests.get.assert_called_once_with(
             'http://jenkins/' + url,
             verify=True,
+            proxies={},
             auth=None)
 
     def check_result(self, response, route, value):
@@ -105,7 +117,7 @@ class TestJenkins(TestCase):
              (('lastSuccessfulBuild', 'number'), 1778),
              (('lastSuccessfulBuild', 'url'),
               'https://builds.apache.org/job/Solr-Trunk/1778/'),
-            ])
+             ])
 
     def checks_last_build_info(self, response):
         self.check_results(
@@ -114,7 +126,7 @@ class TestJenkins(TestCase):
              (('number',), 1783),
              (('result',), 'FAILURE'),
              (('changeSet', 'kind'), 'svn'),
-            ])
+             ])
 
     def checks_last_build_report(self, response):
         self.check_results(
@@ -122,7 +134,7 @@ class TestJenkins(TestCase):
             [(('duration',), 692.3089),
              (('failCount',), 1),
              (('suites', 0, 'name'), 'org.apache.solr.BasicFunctionalityTest'),
-            ])
+             ])
 
     def checks_last_success(self, response):
         self.check_results(
@@ -131,15 +143,16 @@ class TestJenkins(TestCase):
              (('building',), False),
              (('artifacts', 0, 'displayPath'),
               'apache-solr-4.0-2012-02-29_09-07-30-src.tgz'),
-            ])
+             ])
 
     def checks_get_config_xml(self, response):
         self.assertTrue(response.startswith('<?xml'))
         self.assertTrue(response.endswith('</project>'))
 
     # TODO: test job creation, and set_config_xml
-
-    def test_create(self, requests):
+    @patch('autojenkins.jobs.Jenkins.job_exists')
+    def test_create(self, job_exists, requests):
+        job_exists.side_effect = side_effect_job_exists
         requests.post.return_value = mock_response()
         config_xml = path.join(fixture_path, 'create_copy.txt')
         self.jenkins.create('job', config_xml, value='2')
@@ -150,9 +163,12 @@ class TestJenkins(TestCase):
             headers={'Content-Type': 'application/xml'},
             params={'name': 'job'},
             data=CFG,
+            proxies={},
             verify=True)
 
-    def test_create_copy(self, requests):
+    @patch('autojenkins.jobs.Jenkins.job_exists')
+    def test_create_copy(self, job_exists, requests):
+        job_exists.side_effect = side_effect_job_exists
         requests.get.return_value = mock_response('create_copy.txt')
         requests.post.return_value = mock_response()
         self.jenkins.create_copy('job', 'template', value='2')
@@ -163,6 +179,7 @@ class TestJenkins(TestCase):
             headers={'Content-Type': 'application/xml'},
             params={'name': 'job'},
             data=CFG,
+            proxies={},
             verify=True)
 
     def test_transfer(self, requests):
@@ -176,6 +193,7 @@ class TestJenkins(TestCase):
             headers={'Content-Type': 'application/xml'},
             params={'name': 'job'},
             data=CFG,
+            proxies={},
             verify=True)
 
     @data(
@@ -184,15 +202,21 @@ class TestJenkins(TestCase):
         ('enable', 'job/{0}/enable'),
         ('disable', 'job/{0}/disable'),
     )
-    def test_post_methods_with_jobname_no_data(self, case, requests):
+    @patch('autojenkins.jobs.Jenkins.job_info')
+    @patch('autojenkins.jobs.Jenkins.job_exists')
+    def test_post_methods_with_jobname_no_data(self, case, job_exists,
+                                               job_info, requests):
         method, url = case
         # Jenkins API post methods return status 302 upon success
         requests.post.return_value = mock_response(status=302)
+        job_exists.side_effect = side_effect_job_exists
+        job_info.return_value = {'buildable': True}
         response = getattr(self.jenkins, method)('name')
         self.assertEqual(302, response.status_code)
         requests.post.assert_called_once_with(
             'http://jenkins/' + url.format('name'),
             auth=None,
+            proxies={},
             verify=True)
 
     def test_set_config_xml(self, requests):
@@ -206,14 +230,19 @@ class TestJenkins(TestCase):
             headers={'Content-Type': 'application/xml'},
             data=CFG,
             auth=None,
+            proxies={},
             verify=True)
 
     @patch('autojenkins.jobs.time')
     @patch('autojenkins.jobs.Jenkins.last_result')
     @patch('autojenkins.jobs.Jenkins.wait_for_build')
-    def test_build_with_wait(self, wait_for_build, last_result, time,
-                             requests):
+    @patch('autojenkins.jobs.Jenkins.job_exists')
+    @patch('autojenkins.jobs.Jenkins.job_info')
+    def test_build_with_wait(self, job_info, job_exists, wait_for_build,
+                             last_result, time, requests):
         """Test building a job synchronously"""
+        job_exists.side_effect = side_effect_job_exists
+        job_info.return_value = {'buildable': True}
         requests.post.return_value = mock_response(status=302)
         last_result.return_value = {'result': 'HELLO'}
         result = self.jenkins.build('name', wait=True)
@@ -221,6 +250,7 @@ class TestJenkins(TestCase):
         requests.post.assert_called_once_with(
             'http://jenkins/job/name/build',
             auth=None,
+            proxies={},
             verify=True)
         last_result.assert_called_once_with('name')
         time.sleep.assert_called_once_with(10)

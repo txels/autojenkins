@@ -4,6 +4,33 @@ import requests
 from jinja2 import Template
 
 
+class AutojenkinsError(Exception):
+    pass
+
+
+class JobInexistent(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__(self):
+        return repr(self.msg)
+
+
+class JobExists(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__(self):
+        return repr(self.msg)
+
+
+class JobNotBuildable(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__(self):
+        return repr(self.msg)
+
 API = 'api/python'
 NEWJOB = '{0}/createItem'
 JOB_URL = '{0}/job/{1}'
@@ -25,12 +52,22 @@ class HttpStatusError(Exception):
     pass
 
 
+class HttpUnauthorized(Exception):
+    pass
+
+
+class HttpForbidden(Exception):
+    pass
+
+
 class HttpNotFoundError(HttpStatusError):
     pass
 
 
 HTTP_ERROR_MAP = {
-    404: HttpNotFoundError,
+    401: HttpUnauthorized,  # credentials wrong
+    403: HttpForbidden,  # insufficient rights
+    404: HttpNotFoundError
 }
 
 
@@ -50,10 +87,11 @@ def _validate(response):
 class Jenkins(object):
     """Main class to interact with a Jenkins server."""
 
-    def __init__(self, base_url, auth=None, verify_ssl_cert=True):
+    def __init__(self, base_url, auth=None, verify_ssl_cert=True, proxies={}):
         self.ROOT = base_url
         self.auth = auth
         self.verify_ssl_cert = verify_ssl_cert
+        self.proxies = proxies
 
     def _url(self, command, *args):
         """
@@ -76,6 +114,7 @@ class Jenkins(object):
         response = requests.get(url,
                                 auth=self.auth,
                                 verify=self.verify_ssl_cert,
+                                proxies=self.proxies,
                                 **kwargs)
         return _validate(response)
 
@@ -88,6 +127,7 @@ class Jenkins(object):
         response = requests.post(url,
                                  auth=self.auth,
                                  verify=self.verify_ssl_cert,
+                                 proxies=self.proxies,
                                  **kwargs)
         return _validate(response)
 
@@ -113,6 +153,12 @@ class Jenkins(object):
         response = self._build_get(LIST)
         jobs = eval(response.content).get('jobs', [])
         return [(job['name'], job['color']) for job in jobs]
+
+    def job_exists(self, jobname):
+        jobs = self.all_jobs()
+        for (name, color) in jobs:
+            if name == jobname:
+                return True
 
     def job_url(self, jobname):
         """
@@ -194,15 +240,26 @@ class Jenkins(object):
         template = Template(content)
         content = template.render(**context)
 
-        return self._build_post(NEWJOB,
-                                data=content,
-                                params=params,
-                                headers={'Content-Type': 'application/xml'})
+        if self.job_exists(jobname):
+            raise Exception("Job already exists")
+        else:
+            return self._build_post(NEWJOB,
+                                    data=content,
+                                    params=params,
+                                    headers={'Content-Type': 'application/xml'}
+                                    )
 
     def create_copy(self, jobname, template_job, enable=True, **context):
         """
         Create a job from a template job.
         """
+        if not self.job_exists(template_job):
+            raise JobInexistent("Template job '%s' doesn't exists" % jobname)
+
+        if self.job_exists(jobname):
+            raise JobExists("Another job with the name '%s'already exists"
+                            % jobname)
+
         config = self.get_config_xml(template_job)
 
         # remove stupid quotes added by Jenkins
@@ -210,6 +267,7 @@ class Jenkins(object):
         config = config.replace('}}&quot;<', '}}<')
 
         template_config = Template(config)
+
         config = template_config.render(**context)
         if enable:
             config = config.replace('<disabled>true</disabled>',
@@ -244,6 +302,11 @@ class Jenkins(object):
         :param wait:
             If ``True``, wait until job completes building before returning
         """
+        if not self.job_exists(jobname):
+            raise JobInexistent("Job '%s' doesn't exists" % jobname)
+        if not self.job_info(jobname)['buildable']:
+            raise JobNotBuildable("Job '%s' is not buildable (deactivated)."
+                                  % jobname)
         response = self._build_post(BUILD, jobname)
         if not wait:
             return response
@@ -256,7 +319,10 @@ class Jenkins(object):
         """
         Delete a job.
         """
-        return self._build_post(DELETE, jobname)
+        if self.job_exists(jobname):
+            return self._build_post(DELETE, jobname)
+        else:
+            raise JobInexistent("Job '%s' doesn't exist" % jobname)
 
     def enable(self, jobname):
         """
