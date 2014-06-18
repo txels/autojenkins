@@ -36,6 +36,7 @@ NEWJOB = '{0}/createItem'
 JOB_URL = '{0}/job/{1}'
 DELETE = '{0}/job/{1}/doDelete'
 BUILD = '{0}/job/{1}/build'
+BUILD_W_PARAMS = '{0}/job/{1}/buildWithParameters?{2}'
 CONFIG = '{0}/job/{1}/config.xml'
 JOBINFO = '{0}/job/{1}/' + API
 BUILDINFO = '{0}/job/{1}/{2}/' + API
@@ -295,18 +296,24 @@ class Jenkins(object):
         params = {'name': jobname, 'mode': 'copy', 'from': copy_from}
         return self._build_post(NEWJOB, params=params)
 
-    def build(self, jobname, wait=False, grace=10):
+    def build(self, jobname, params=None, wait=False, grace=10):
         """
         Trigger Jenkins to build a job.
 
         :param wait:
             If ``True``, wait until job completes building before returning
+        :param params:
+            If params is a dictionary, append key, value pairs onto BUILD_W_PARAMS url
         """
         if not self.job_exists(jobname):
             raise JobInexistent("Job '%s' doesn't exists" % jobname)
         if not self.job_info(jobname)['buildable']:
             raise JobNotBuildable("Job '%s' is not buildable (deactivated)."
                                   % jobname)
+        if params and type(params) == "dict":
+            param_string = " ".join(["{0}={1}".format(key, params[key]) for key in params.keys()])
+            print param_string
+            sys.exit(0)
         response = self._build_post(BUILD, jobname)
         if not wait:
             return response
