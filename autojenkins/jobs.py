@@ -2,6 +2,7 @@ import sys
 import time
 import requests
 from jinja2 import Template
+import urllib
 
 
 class AutojenkinsError(Exception):
@@ -310,11 +311,11 @@ class Jenkins(object):
         if not self.job_info(jobname)['buildable']:
             raise JobNotBuildable("Job '%s' is not buildable (deactivated)."
                                   % jobname)
-        if params and type(params) == "dict":
-            param_string = " ".join(["{0}={1}".format(key, params[key]) for key in params.keys()])
-            print param_string
-            sys.exit(0)
-        response = self._build_post(BUILD, jobname)
+        if params and isinstance(params, dict):
+            param_string = urllib.urlencode(params)
+            response = self._build_post(BUILD_W_PARAMS, jobname, param_string)
+        else:
+            response = self._build_post(BUILD, jobname)
         if not wait:
             return response
         else:
