@@ -15,14 +15,14 @@ setup(
     author_email='carles@barrobes.com',
     url='https://github.com/txels/autojenkins',
     packages=['autojenkins'],
-    install_requires=['requests', 'jinja2'],
-    entry_points = dict(
-        console_scripts = [
+    install_requires=['docopt', 'requests', 'jinja2'],
+    entry_points=dict(
+        console_scripts=[
             'autojenkins = autojenkins.run:Commands.main'
         ],
     ),
     #include_package_data=True,
-    package_data = {
+    package_data={
         '': ['*.txt', '*.rst'],
     },
     classifiers=[
