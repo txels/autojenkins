@@ -254,7 +254,7 @@ class Jenkins(object):
         Create a job from a template job.
         """
         if not self.job_exists(template_job):
-            raise JobInexistent("Template job '%s' doesn't exists" % jobname)
+            raise JobInexistent("Template job '%s' doesn't exists" % template_job)
 
         if self.job_exists(jobname):
             raise JobExists("Another job with the name '%s'already exists"
