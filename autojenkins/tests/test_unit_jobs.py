@@ -182,6 +182,21 @@ class TestJenkins(TestCase):
             proxies={},
             verify=True)
 
+    @patch('autojenkins.jobs.Jenkins.job_exists')
+    def test_create_copy_forced(self, job_exists, requests):
+        job_exists.side_effect = side_effect_job_exists
+        requests.get.return_value = mock_response('create_copy.txt')
+        requests.post.return_value = mock_response()
+        self.jenkins.create_copy('name', 'template', _force=True, value='2')
+        CFG = "<value>2</value><disabled>false</disabled>"
+        requests.post.assert_called_once_with(
+            'http://jenkins/job/name/config.xml',
+            headers={'Content-Type': 'application/xml'},
+            data=CFG,
+            auth=None,
+            proxies={},
+            verify=True)
+
     def test_transfer(self, requests):
         requests.get.return_value = mock_response('transfer.txt')
         requests.post.return_value = mock_response()
