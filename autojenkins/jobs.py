@@ -249,14 +249,14 @@ class Jenkins(object):
                                     headers={'Content-Type': 'application/xml'}
                                     )
 
-    def create_copy(self, jobname, template_job, enable=True, update=False, **context):
+    def create_copy(self, jobname, template_job, enable=True, _force=False, **context):
         """
         Create a job from a template job.
         """
         if not self.job_exists(template_job):
             raise JobInexistent("Template job '%s' doesn't exists" % template_job)
 
-        if not update and self.job_exists(jobname):
+        if not _force and self.job_exists(jobname):
             raise JobExists("Another job with the name '%s'already exists"
                             % jobname)
 
@@ -273,7 +273,7 @@ class Jenkins(object):
             config = config.replace('<disabled>true</disabled>',
                                     '<disabled>false</disabled>')
 
-        if update:
+        if _force:
             return self.set_config_xml(jobname, config)
         else:
             return self._build_post(NEWJOB,
