@@ -256,7 +256,9 @@ class Jenkins(object):
         if not self.job_exists(template_job):
             raise JobInexistent("Template job '%s' doesn't exists" % template_job)
 
-        if not _force and self.job_exists(jobname):
+        target_job_exists = self.job_exists(jobname)
+
+        if not _force and target_job_exists:
             raise JobExists("Another job with the name '%s'already exists"
                             % jobname)
 
@@ -273,7 +275,7 @@ class Jenkins(object):
             config = config.replace('<disabled>true</disabled>',
                                     '<disabled>false</disabled>')
 
-        if _force:
+        if target_job_exists:
             return self.set_config_xml(jobname, config)
         else:
             return self._build_post(NEWJOB,
