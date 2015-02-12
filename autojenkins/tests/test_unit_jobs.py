@@ -200,7 +200,7 @@ class TestJenkins(TestCase):
 
     @patch('autojenkins.jobs.Jenkins.job_exists')
     def test_create_copy_forced_new_job(self, job_exists, requests):
-        job_exists.return_value = True
+        job_exists.side_effect = side_effect_job_exists
         requests.get.return_value = mock_response('create_copy.txt')
         requests.post.return_value = mock_response()
         self.jenkins.create_copy('name', 'template', _force=True, value='2')
