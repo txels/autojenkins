@@ -183,8 +183,24 @@ class TestJenkins(TestCase):
             verify=True)
 
     @patch('autojenkins.jobs.Jenkins.job_exists')
-    def test_create_copy_forced(self, job_exists, requests):
+    def test_create_copy_forced_job_exists(self, job_exists, requests):
         job_exists.side_effect = side_effect_job_exists
+        requests.get.return_value = mock_response('create_copy.txt')
+        requests.post.return_value = mock_response()
+        self.jenkins.create_copy('job', 'template', _force=True, value='2')
+        CFG = "<value>2</value><disabled>false</disabled>"
+        requests.post.assert_called_once_with(
+            'http://jenkins/createItem',
+            auth=None,
+            headers={'Content-Type': 'application/xml'},
+            params={'name': 'job'},
+            data=CFG,
+            proxies={},
+            verify=True)
+
+    @patch('autojenkins.jobs.Jenkins.job_exists')
+    def test_create_copy_forced_new_job(self, job_exists, requests):
+        job_exists.return_value = True
         requests.get.return_value = mock_response('create_copy.txt')
         requests.post.return_value = mock_response()
         self.jenkins.create_copy('name', 'template', _force=True, value='2')
