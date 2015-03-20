@@ -46,7 +46,8 @@ LAST_BUILD = '{0}/job/{1}/lastBuild/' + API
 LAST_REPORT = '{0}/job/{1}/lastBuild/testReport/' + API
 ENABLE = '{0}/job/{1}/enable'
 DISABLE = '{0}/job/{1}/disable'
-
+NEWVIEW = '{0}/createView'
+NEW_JOB_INTO_VIEW = '{0}/view/{1}/createItem'
 
 class HttpStatusError(Exception):
     pass
@@ -356,3 +357,36 @@ class Jenkins(object):
             sys.stdout.write('.')
             sys.stdout.flush()
         print('')
+        
+    def createJobIntoView(self, jobname, viewname, config_file, **context):
+        """
+        Create a job into a view from a configuration file.
+        """
+        params = {'name': jobname}
+        with open(config_file) as file:
+            content = file.read()
+
+        template = Template(content)
+        content = template.render(**context)
+
+        return self._build_post(NEW_JOB_INTO_VIEW,
+                                viewname,
+                                data=content,
+                                params=params,
+                                headers={'Content-Type': 'application/xml'})
+        
+    def create_view(self, viewname, config_file, **context):
+        """
+        Create a view from a configuration file.
+        """
+        params = {'name': viewname}
+        with open(config_file) as file:
+            content = file.read()
+    
+        template = Template(content)
+        content = template.render(**context)
+    
+        return self._build_post(NEWVIEW,
+                                data=content,
+                                params=params,
+                                headers={'Content-Type': 'application/xml'})        
