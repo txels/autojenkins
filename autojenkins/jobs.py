@@ -46,6 +46,7 @@ LAST_BUILD = '{0}/job/{1}/lastBuild/' + API
 LAST_REPORT = '{0}/job/{1}/lastBuild/testReport/' + API
 ENABLE = '{0}/job/{1}/enable'
 DISABLE = '{0}/job/{1}/disable'
+CONSOLE = '{0}/job/{1}/{2}/consoleText'
 
 
 class HttpStatusError(Exception):
@@ -185,6 +186,25 @@ class Jenkins(object):
             args = (LAST_BUILD, jobname)
         response = self._build_get(*args)
         return eval(response.content)
+
+    def build_console(self, jobname, build_number=None):
+        """
+        Get the console output for the build of a job.
+
+        If no build number is specified, defaults to the most recent build.
+        """
+        if build_number is not None:
+            args = (CONSOLE, jobname, build_number)
+        else:
+            args = (CONSOLE, jobname, "lastBuild")
+        response = self._build_get(*args)
+        return response.content
+
+    def last_build_console(self, jobname):
+        """
+        Get the console output for the last build of a job.
+        """
+        return self.build_console(jobname)
 
     def last_build_info(self, jobname):
         """
