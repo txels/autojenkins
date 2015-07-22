@@ -78,7 +78,6 @@ def _validate(response):
     """
     message = 'HTTP Status: {0}'.format(response.status_code)
     if response.status_code >= 400:
-        print(message)
         exception_cls = HTTP_ERROR_MAP.get(response.status_code,
                                            HttpStatusError)
         raise exception_cls(message)
