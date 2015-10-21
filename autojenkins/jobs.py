@@ -36,6 +36,7 @@ NEWJOB = '{0}/createItem'
 JOB_URL = '{0}/job/{1}'
 DELETE = '{0}/job/{1}/doDelete'
 BUILD = '{0}/job/{1}/build'
+BUILD_WITH_PARAMS = '{0}/job/{1}/buildWithParameters'
 CONFIG = '{0}/job/{1}/config.xml'
 JOBINFO = '{0}/job/{1}/' + API
 BUILDINFO = '{0}/job/{1}/{2}/' + API
@@ -319,10 +320,12 @@ class Jenkins(object):
         params = {'name': jobname, 'mode': 'copy', 'from': copy_from}
         return self._build_post(NEWJOB, params=params)
 
-    def build(self, jobname, wait=False, grace=10):
+    def build(self, jobname, params=None, wait=False, grace=10):
         """
         Trigger Jenkins to build a job.
 
+        :param params:
+            If params are provided, use the "buildWithParameters" endpoint
         :param wait:
             If ``True``, wait until job completes building before returning
         """
@@ -331,7 +334,8 @@ class Jenkins(object):
         if not self.job_info(jobname)['buildable']:
             raise JobNotBuildable("Job '%s' is not buildable (deactivated)."
                                   % jobname)
-        response = self._build_post(BUILD, jobname)
+        url_pattern = BUILD if params is None else BUILD_WITH_PARAMS
+        response = self._build_post(url_pattern, jobname, params=params)
         if not wait:
             return response
         else:
