@@ -27,6 +27,8 @@ Options:
 
 """
 
+from __future__ import print_function
+
 import sys
 from docopt import docopt
 
@@ -93,7 +95,7 @@ def create_job(host, jobname, options):
         print ('Job URL: {0}'.format(jenkins.job_url(jobname)))
         return response.status_code < 400
     except jobs.JobExists as error:
-        print "Error: %s" % error.msg
+        print("Error:", error.msg)
         return False
 
 
@@ -119,10 +121,10 @@ def build_job(host, jobname, options):
             print('Result = "{0}"'.format(result))
             return result == 'SUCCESS'
         else:
-            print "Build '%s' started" % jobname
+            print("Build '%s' started" % jobname)
             return response.status_code < 400
     except (jobs.JobInexistent, jobs.JobNotBuildable) as error:
-        print "Error: %s" % error.msg
+        print("Error:", error.msg)
         return False
 
 
@@ -136,9 +138,10 @@ def delete_jobs(host, jobnames, options):
         try:
             response = jenkins.delete(jobname)
             if response.status_code == 200:
-                print "Job '%s' deleted" % jobname
+                print("Job '%s' deleted" % jobname)
         except jobs.JobInexistent as error:
-            print "Error: %s" % error.msg
+            print("Error:", error.msg)
+            print("Error:", error.msg)
         except (jobs.HttpForbidden, jobs.HttpUnauthorized):
             pass
 
