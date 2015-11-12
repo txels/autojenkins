@@ -1,3 +1,4 @@
+import sys
 from os import path
 from unittest import TestCase
 
@@ -8,6 +9,11 @@ from autojenkins.jobs import Jenkins, HttpNotFoundError, HttpStatusError
 
 
 fixture_path = path.dirname(__file__)
+
+
+PY2 = sys.version_info < (3,)
+if not PY2:
+    long = int
 
 
 def load_fixture(name):
@@ -122,7 +128,7 @@ class TestJenkins(TestCase):
     def checks_last_build_info(self, response):
         self.check_results(
             response,
-            [(('timestamp',), 1330941036216L),
+            [(('timestamp',), long(1330941036216)),
              (('number',), 1783),
              (('result',), 'FAILURE'),
              (('changeSet', 'kind'), 'svn'),
