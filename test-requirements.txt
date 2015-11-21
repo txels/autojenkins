@@ -1,4 +1,4 @@
-coverage==3.4
+coverage==4.0.2
 ddt
 mock>=0.8
 nose
