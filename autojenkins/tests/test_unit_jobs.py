@@ -25,11 +25,11 @@ def load_fixture(name):
 def mock_response(fixture=None, status=200):
     response = Mock()
     if fixture is None:
-        response.content = ''
+        response.text = ''
     elif isinstance(fixture, dict):
-        response.content = str(fixture)
+        response.text = str(fixture)
     else:
-        response.content = load_fixture(fixture)
+        response.text = load_fixture(fixture)
     response.status_code = status
     return response
 
@@ -67,7 +67,7 @@ class TestJenkins(TestCase):
 
     def test_last_result(self, requests, *args):
         second_response = Mock(status_code=200)
-        second_response.content = "{'result': 23}"
+        second_response.text = "{'result': 23}"
         requests.get.side_effect = [
             mock_response('job_info.txt'), second_response
         ]
