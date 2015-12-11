@@ -151,7 +151,7 @@ class Jenkins(object):
         (SUCCESS, UNSTABLE or FAILED).
         """
         response = self._build_get(LIST)
-        jobs = eval(response.content).get('jobs', [])
+        jobs = eval(response.text).get('jobs', [])
         return [(job['name'], job['color']) for job in jobs]
 
     def job_exists(self, jobname):
@@ -171,7 +171,7 @@ class Jenkins(object):
         Get all information for a job as a Python object (dicts & lists).
         """
         response = self._build_get(JOBINFO, jobname)
-        return eval(response.content)
+        return eval(response.text)
 
     def build_info(self, jobname, build_number=None):
         """
@@ -184,7 +184,7 @@ class Jenkins(object):
         else:
             args = (LAST_BUILD, jobname)
         response = self._build_get(*args)
-        return eval(response.content)
+        return eval(response.text)
 
     def build_console(self, jobname, build_number=None):
         """
@@ -197,7 +197,7 @@ class Jenkins(object):
         else:
             args = (CONSOLE, jobname, "lastBuild")
         response = self._build_get(*args)
-        return response.content
+        return response.text
 
     def last_build_console(self, jobname):
         """
@@ -216,7 +216,7 @@ class Jenkins(object):
         Get full report of last build.
         """
         response = self._build_get(LAST_REPORT, jobname)
-        return eval(response.content)
+        return eval(response.text)
 
     def last_result(self, jobname):
         """
@@ -224,21 +224,21 @@ class Jenkins(object):
         """
         last_result_url = self.job_info(jobname)['lastBuild']['url']
         response = self._http_get(last_result_url + API)
-        return eval(response.content)
+        return eval(response.text)
 
     def last_success(self, jobname):
         """
         Return information about the last successful build.
         """
         response = self._build_get(LAST_SUCCESS, jobname)
-        return eval(response.content)
+        return eval(response.text)
 
     def get_config_xml(self, jobname):
         """
         Get the ``config.xml`` file that contains the job definition.
         """
         response = self._build_get(CONFIG, jobname)
-        return response.content
+        return response.text
 
     def set_config_xml(self, jobname, config):
         """
