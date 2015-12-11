@@ -36,6 +36,7 @@ NEWJOB = '{0}/createItem'
 JOB_URL = '{0}/job/{1}'
 DELETE = '{0}/job/{1}/doDelete'
 BUILD = '{0}/job/{1}/build'
+BUILD_WITH_PARAMS = '{0}/job/{1}/buildWithParameters'
 CONFIG = '{0}/job/{1}/config.xml'
 JOBINFO = '{0}/job/{1}/' + API
 BUILDINFO = '{0}/job/{1}/{2}/' + API
@@ -151,7 +152,7 @@ class Jenkins(object):
         (SUCCESS, UNSTABLE or FAILED).
         """
         response = self._build_get(LIST)
-        jobs = eval(response.content).get('jobs', [])
+        jobs = eval(response.text).get('jobs', [])
         return [(job['name'], job['color']) for job in jobs]
 
     def job_exists(self, jobname):
@@ -171,7 +172,7 @@ class Jenkins(object):
         Get all information for a job as a Python object (dicts & lists).
         """
         response = self._build_get(JOBINFO, jobname)
-        return eval(response.content)
+        return eval(response.text)
 
     def build_info(self, jobname, build_number=None):
         """
@@ -184,7 +185,7 @@ class Jenkins(object):
         else:
             args = (LAST_BUILD, jobname)
         response = self._build_get(*args)
-        return eval(response.content)
+        return eval(response.text)
 
     def build_console(self, jobname, build_number=None):
         """
@@ -197,7 +198,7 @@ class Jenkins(object):
         else:
             args = (CONSOLE, jobname, "lastBuild")
         response = self._build_get(*args)
-        return response.content
+        return response.text
 
     def last_build_console(self, jobname):
         """
@@ -216,7 +217,7 @@ class Jenkins(object):
         Get full report of last build.
         """
         response = self._build_get(LAST_REPORT, jobname)
-        return eval(response.content)
+        return eval(response.text)
 
     def last_result(self, jobname):
         """
@@ -224,21 +225,21 @@ class Jenkins(object):
         """
         last_result_url = self.job_info(jobname)['lastBuild']['url']
         response = self._http_get(last_result_url + API)
-        return eval(response.content)
+        return eval(response.text)
 
     def last_success(self, jobname):
         """
         Return information about the last successful build.
         """
         response = self._build_get(LAST_SUCCESS, jobname)
-        return eval(response.content)
+        return eval(response.text)
 
     def get_config_xml(self, jobname):
         """
         Get the ``config.xml`` file that contains the job definition.
         """
         response = self._build_get(CONFIG, jobname)
-        return response.content
+        return response.text
 
     def set_config_xml(self, jobname, config):
         """
@@ -319,10 +320,12 @@ class Jenkins(object):
         params = {'name': jobname, 'mode': 'copy', 'from': copy_from}
         return self._build_post(NEWJOB, params=params)
 
-    def build(self, jobname, wait=False, grace=10):
+    def build(self, jobname, params=None, wait=False, grace=10):
         """
         Trigger Jenkins to build a job.
 
+        :param params:
+            If params are provided, use the "buildWithParameters" endpoint
         :param wait:
             If ``True``, wait until job completes building before returning
         """
@@ -331,7 +334,8 @@ class Jenkins(object):
         if not self.job_info(jobname)['buildable']:
             raise JobNotBuildable("Job '%s' is not buildable (deactivated)."
                                   % jobname)
-        response = self._build_post(BUILD, jobname)
+        url_pattern = BUILD if params is None else BUILD_WITH_PARAMS
+        response = self._build_post(url_pattern, jobname, params=params)
         if not wait:
             return response
         else:
