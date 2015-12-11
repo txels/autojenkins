@@ -250,11 +250,16 @@ class TestJenkins(TestCase):
         job_info.return_value = {'buildable': True}
         response = getattr(self.jenkins, method)('name')
         self.assertEqual(302, response.status_code)
+        kwargs = {
+            'auth': None,
+            'proxies': {},
+            'verify': True
+        }
+        if method == 'build':
+            kwargs['params'] = None
         requests.post.assert_called_once_with(
             'http://jenkins/' + url.format('name'),
-            auth=None,
-            proxies={},
-            verify=True)
+            **kwargs)
 
     def test_set_config_xml(self, requests):
         requests.post.return_value = Mock(status_code=200)
@@ -287,6 +292,7 @@ class TestJenkins(TestCase):
         requests.post.assert_called_once_with(
             'http://jenkins/job/name/build',
             auth=None,
+            params=None,
             proxies={},
             verify=True)
         last_result.assert_called_once_with('name')
