@@ -45,6 +45,7 @@ LAST_SUCCESS = '{0}/job/{1}/lastSuccessfulBuild/' + API
 TEST_REPORT = '{0}/job/{1}/lastSuccessfulBuild/testReport/' + API
 LAST_BUILD = '{0}/job/{1}/lastBuild/' + API
 LAST_REPORT = '{0}/job/{1}/lastBuild/testReport/' + API
+CONSOLE_TEXT = '{0}/job/{1}/{2}/consoleText'
 ENABLE = '{0}/job/{1}/enable'
 DISABLE = '{0}/job/{1}/disable'
 CONSOLE = '{0}/job/{1}/{2}/consoleText'
@@ -218,6 +219,13 @@ class Jenkins(object):
         """
         response = self._build_get(LAST_REPORT, jobname)
         return eval(response.text)
+
+    def console_text(self, jobname, build_number='lastBuild'):
+        """
+        Get console text output of last build.
+        """
+        response = self._build_get(CONSOLE_TEXT, jobname, build_number)
+        return response.content
 
     def last_result(self, jobname):
         """

@@ -32,6 +32,7 @@ from __future__ import print_function
 import sys
 from docopt import docopt
 
+from ajk_version import __version__
 from autojenkins import Jenkins, jobs
 
 COLOR_MEANING = {
@@ -177,7 +178,7 @@ def list_jobs(host, options, color=True, raw=False):
 class Commands:
     @staticmethod
     def main():
-        args = docopt(__doc__, version='autojenkins 0.9.0-docopt')
+        args = docopt(__doc__, version=__version__)
         if args['list']:
             list_jobs(args['<host>'], args, not args['--no-color'],
                       args['--raw'])
