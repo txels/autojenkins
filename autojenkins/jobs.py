@@ -145,7 +145,7 @@ class Jenkins(object):
         """
         return self._http_post(self._url(url_pattern, *args), **kwargs)
 
-    def all_jobs(self):
+    def all_jobs(self, include_colorless=False):
         """
         Get a list of tuples with (name, color) of all jobs in the server.
 
@@ -154,7 +154,8 @@ class Jenkins(object):
         """
         response = self._build_get(LIST)
         jobs = eval(response.text).get('jobs', [])
-        return [(job['name'], job['color']) for job in jobs]
+        return [(job['name'], job.get('color', None)) 
+                for job in jobs if 'color' in job or include_colorless]
 
     def job_exists(self, jobname):
         jobs = self.all_jobs()
