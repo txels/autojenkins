@@ -32,6 +32,7 @@ class JobNotBuildable(Exception):
         return repr(self.msg)
 
 API = 'api/python'
+CRUMB_GENERATOR = '{0}/crumbIssuer/api/json'
 NEWJOB = '{0}/createItem'
 JOB_URL = '{0}/job/{1}'
 DELETE = '{0}/job/{1}/doDelete'
@@ -50,6 +51,8 @@ ENABLE = '{0}/job/{1}/enable'
 DISABLE = '{0}/job/{1}/disable'
 CONSOLE = '{0}/job/{1}/{2}/consoleText'
 
+HTTP_HEADERS_KEY_NAME = 'headers'
+JENKINS_CRUMB_HEADER_KEY_NAME = 'Jenkins-Crumb'
 
 class HttpStatusError(Exception):
     pass
@@ -89,11 +92,12 @@ def _validate(response):
 class Jenkins(object):
     """Main class to interact with a Jenkins server."""
 
-    def __init__(self, base_url, auth=None, verify_ssl_cert=True, proxies={}):
+    def __init__(self, base_url, auth=None, verify_ssl_cert=True, proxies=None, csrf_protected=False):
         self.ROOT = base_url
         self.auth = auth
         self.verify_ssl_cert = verify_ssl_cert
-        self.proxies = proxies
+        self.proxies = proxies or {}
+        self.csrf_protected = csrf_protected
 
     def _url(self, command, *args):
         """
@@ -126,12 +130,25 @@ class Jenkins(object):
 
         This will add required authentication and SSL verification arguments.
         """
+
+        self._support_csrf(**kwargs)
+
         response = requests.post(url,
                                  auth=self.auth,
                                  verify=self.verify_ssl_cert,
                                  proxies=self.proxies,
                                  **kwargs)
         return _validate(response)
+
+    def _support_csrf(self, **kwargs):
+        if self.csrf_protected:
+            crumb = requests.get(self._url(CRUMB_GENERATOR),
+                                 auth=self.auth,
+                                 verify=self.verify_ssl_cert).json()["crumb"]
+
+            headers = kwargs.get(HTTP_HEADERS_KEY_NAME, {})
+            headers[JENKINS_CRUMB_HEADER_KEY_NAME] = crumb
+            kwargs.update({HTTP_HEADERS_KEY_NAME: headers})
 
     def _build_get(self, url_pattern, *args, **kwargs):
         """
