@@ -131,7 +131,8 @@ class Jenkins(object):
         This will add required authentication and SSL verification arguments.
         """
 
-        self._support_csrf(**kwargs)
+        enriched_headers = self._support_csrf(**kwargs)
+        kwargs.update({HTTP_HEADERS_KEY_NAME: enriched_headers})
 
         response = requests.post(url,
                                  auth=self.auth,
@@ -148,7 +149,10 @@ class Jenkins(object):
 
             headers = kwargs.get(HTTP_HEADERS_KEY_NAME, {})
             headers[JENKINS_CRUMB_HEADER_KEY_NAME] = crumb
-            kwargs.update({HTTP_HEADERS_KEY_NAME: headers})
+
+            return headers
+
+        return {}
 
     def _build_get(self, url_pattern, *args, **kwargs):
         """
