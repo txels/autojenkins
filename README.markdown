@@ -63,12 +63,3 @@ jenkins = Jenkins('http://jenkins', auth=('user', 'pass'))
 
 Note that you can use either a cleartext password or a Jenkins API token
 as the password.
-
-CSRF Protection
----------------
-
-The client also supports CSRF protection (when it's enabled in Jenkins server). You can turn it on like this:
-
-```python
-jenkins = Jenkins('http://jenkins', csrf_protected=True)
-```
