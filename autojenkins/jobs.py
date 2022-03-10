@@ -94,6 +94,7 @@ class Jenkins(object):
         self.auth = auth
         self.verify_ssl_cert = verify_ssl_cert
         self.proxies = proxies
+        self.session = requests.Session()
 
     def _url(self, command, *args):
         """
@@ -113,7 +114,7 @@ class Jenkins(object):
 
         This will add required authentication and SSL verification arguments.
         """
-        response = requests.get(url,
+        response = self.session.get(url,
                                 auth=self.auth,
                                 verify=self.verify_ssl_cert,
                                 proxies=self.proxies,
@@ -126,7 +127,7 @@ class Jenkins(object):
 
         This will add required authentication and SSL verification arguments.
         """
-        response = requests.post(url,
+        response = self.session.post(url,
                                  auth=self.auth,
                                  verify=self.verify_ssl_cert,
                                  proxies=self.proxies,
